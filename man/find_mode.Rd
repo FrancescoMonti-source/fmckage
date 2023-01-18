@@ -6,9 +6,12 @@
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Find mode value (the most frequent value) in a vector. In case of ex aequos (several values are "the most frequent value" as they have exactly the same number of occurrences) the function returns all of them.
 }
 \usage{
 find_mode(x)
+
+    where (x) is a vector
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,14 +45,14 @@ find_mode(x)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+apply(iris,2,find_mode)
 
-## The function is currently defined as
-function (x)
-{
-  }
+## The function is currently defined as:
+find_mode <- function(x) {
+    u <- unique(x)
+    tab <- tabulate(match(x, u))
+    u[tab == max(tab)]
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
