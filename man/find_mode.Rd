@@ -11,12 +11,12 @@ Find mode value (the most frequent value) in a vector. In case of ex aequos (sev
 \usage{
 find_mode(x)
 
-    where (x) is a vector
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 %%     ~~Describe \code{x} here~~
+a numeric vector
 }
 }
 \details{
