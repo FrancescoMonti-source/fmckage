@@ -1,7 +1,7 @@
-\name{Transparent colors}
+\name{t_col}
 \alias{t_col}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{
+\title{Transparent colors
 %%  ~~function to do ... ~~
 }
 \description{Sometimes you may be forced to specify a colour like in an if-else statement and the function you are using doesn't accept the "alpha" argument. This was my case using kableExtra and wanting to do conditional formatting of cell_spec. This function allows you to easily make transparent colors the rgb() command. These colors can be useful for charts and graphics with overlapping elements.
