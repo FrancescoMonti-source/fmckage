@@ -1,7 +1,7 @@
 \name{coalesce_join}
 \alias{coalesce_join}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{
+\title{coalesce_join}
 %%  ~~function to do ... ~~
 }
 \description{
