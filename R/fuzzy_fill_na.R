@@ -1,4 +1,17 @@
-fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, replace_cols = NULL, keep_cols = NULL) {
+fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, replace_cols = NULL, keep_cols = NULL, stringdist_threshold = 2, stringdist_method = "lv") {
+    # Define the string distance matching function
+    match_stringdist <- function(x, y) {
+        stringdist::stringdist(x, y, method = stringdist_method) <= stringdist_threshold
+    }
+
+    # Replace stringdist::stringdist with match_stringdist in match_fun_list
+    match_fun_list <- lapply(match_fun_list, function(fun) {
+        if (fun == stringdist::stringdist) {
+            fun <- match_stringdist
+        }
+        return(fun)
+    })
+
     # Perform the fuzzy join
     join_result <- df1 %>%
         fuzzyjoin::fuzzy_left_join(df2,
