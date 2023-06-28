@@ -1,3 +1,47 @@
+#' Perform a fuzzy join between two dataframes and fill NA values
+#'
+#' This function performs a fuzzy join between two dataframes based on specified matching columns and functions.
+#' It then fills NA values in the specified columns of the first dataframe with the corresponding values from the second dataframe.
+#'
+#' @param df1 A dataframe. The dataframe to fill NA values in.
+#' @param df2 A dataframe. The dataframe to fill NA values from.
+#' @param match_cols A character vector. The names of the columns to match on.
+#' @param match_fun_list A list of functions. The matching functions to use for each column specified in match_cols.
+#' @param fill_cols A character vector. The names of the columns in df1 to fill NA values in.
+#' @param replace_cols A character vector, optional. The names of the columns in df1 to replace values in. Default is NULL.
+#' @param keep_cols A character vector, optional. The names of the columns in df2 to keep in the result. Default is NULL.
+#' @param stringdist_threshold A numeric value, optional. The maximum string distance for a match. Default is 2.
+#' @param stringdist_method A character string, optional. The method to use for string distance calculation.
+#' Can be one of "osa", "lv", "dl", "hamming", "lcs", "qgram", "cosine", "jaccard", "jw", or "soundex".
+#' Default is "jw" (Jaro-Winkler). For more information about these methods, see \code{\link[stringdist]{stringdist}}.
+#' @return A dataframe. The first dataframe with NA values filled.
+#' @examples
+#' \dontrun{
+#' # Create some synthetic data
+#' df1 <- data.frame(
+#'   name = c("John", "Alice", "Bob", "Charlie"),
+#'   birthdate = as.Date(c("2000-01-01", "2000-02-02", "2000-03-03", "2000-04-04")),
+#'   city = c("New York", "Los Angeles", "Chicago", "San Francisco"),
+#'   id = c(NA, "123", "456", NA),
+#'   stringsAsFactors = FALSE
+#' )
+#' df2 <- data.frame(
+#'   name = c("John", "Alice", "Bob", "Charlie", "Charlie"),
+#'   birthdate = as.Date(c("2000-01-05", "2000-02-02", "2000-03-03", "2000-04-01", "2000-04-07")),
+#'   city = c("New York", "Los Angeles", "Chicago", "San Francisco", "San Francisco"),
+#'   id = c("789", "123", "456", "789", "012"),
+#'   stringsAsFactors = FALSE
+#' )
+#' # Define the matching columns and functions
+#' match_cols <- c("name", "birthdate", "city")
+#' match_fun_list <- list(`stringdist::stringdist`, `%within%`, `stringdist::stringdist`)
+#' # Define the columns to fill
+#' fill_cols <- c("id")
+#' # Perform the fuzzy join and fill NA values
+#' df_filled <- fuzzy_fill_na(df1, df2, match_cols, match_fun_list, fill_cols, stringdist_threshold = 2, stringdist_method = "jw")
+#' }
+#' @export
+
 fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, replace_cols = NULL, keep_cols = NULL, stringdist_threshold = 2, stringdist_method = "lv") {
     # Define the string distance matching function
     match_stringdist <- function(x, y) {
