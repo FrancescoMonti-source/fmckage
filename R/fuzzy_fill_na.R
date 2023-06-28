@@ -7,14 +7,14 @@
 #' @param df2 A dataframe. The dataframe to fill NA values from.
 #' @param match_cols A character vector. The names of the columns to match on.
 #' @param match_fun_list A list of functions. The matching functions to use for each column specified in match_cols.
+#' Each function should return a logical vector indicating the matches.
 #' @param fill_cols A character vector. The names of the columns in df1 to fill NA values in.
 #' @param replace_cols A character vector, optional. The names of the columns in df1 to replace values in. Default is NULL.
 #' @param keep_cols A character vector, optional. The names of the columns in df2 to keep in the result. Default is NULL.
-#' @param stringdist_threshold A numeric value, optional. The maximum string distance for a match. Default is 2.
-#' @param stringdist_method A character string, optional. The method to use for string distance calculation.
-#' Can be one of "osa", "lv", "dl", "hamming", "lcs", "qgram", "cosine", "jaccard", "jw", or "soundex".
-#' Default is "jw" (Jaro-Winkler). For more information about these methods, see \code{\link[stringdist]{stringdist}}.
 #' @return A dataframe. The first dataframe with NA values filled.
+#' @details
+#' This function uses the \code{\link{within_days}} and \code{\link{match_stringdist}} functions for matching.
+#' It has dependencies on the \code{fuzzyjoin}, \code{dplyr}, \code{stringdist}, and \code{lubridate} packages.
 #' @examples
 #' \dontrun{
 #' # Create some synthetic data
@@ -42,20 +42,8 @@
 #' }
 #' @export
 
-fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, replace_cols = NULL, keep_cols = NULL, stringdist_threshold = 2, stringdist_method = "lv") {
-    # Define the string distance matching function
-    match_stringdist <- function(x, y) {
-        stringdist::stringdist(x, y, method = stringdist_method) <= stringdist_threshold
-    }
 
-    # Replace stringdist::stringdist with match_stringdist in match_fun_list
-    match_fun_list <- lapply(match_fun_list, function(fun) {
-        if (fun == stringdist::stringdist) {
-            fun <- match_stringdist
-        }
-        return(fun)
-    })
-
+fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, replace_cols = NULL, keep_cols = NULL) {
     # Perform the fuzzy join
     join_result <- df1 %>%
         fuzzyjoin::fuzzy_left_join(df2,

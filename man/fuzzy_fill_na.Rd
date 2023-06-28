@@ -11,9 +11,7 @@ fuzzy_fill_na(
   match_fun_list,
   fill_cols,
   replace_cols = NULL,
-  keep_cols = NULL,
-  stringdist_threshold = 2,
-  stringdist_method = "lv"
+  keep_cols = NULL
 )
 }
 \arguments{
@@ -23,19 +21,14 @@ fuzzy_fill_na(
 
 \item{match_cols}{A character vector. The names of the columns to match on.}
 
-\item{match_fun_list}{A list of functions. The matching functions to use for each column specified in match_cols.}
+\item{match_fun_list}{A list of functions. The matching functions to use for each column specified in match_cols.
+Each function should return a logical vector indicating the matches.}
 
 \item{fill_cols}{A character vector. The names of the columns in df1 to fill NA values in.}
 
 \item{replace_cols}{A character vector, optional. The names of the columns in df1 to replace values in. Default is NULL.}
 
 \item{keep_cols}{A character vector, optional. The names of the columns in df2 to keep in the result. Default is NULL.}
-
-\item{stringdist_threshold}{A numeric value, optional. The maximum string distance for a match. Default is 2.}
-
-\item{stringdist_method}{A character string, optional. The method to use for string distance calculation.
-Can be one of "osa", "lv", "dl", "hamming", "lcs", "qgram", "cosine", "jaccard", "jw", or "soundex".
-Default is "jw" (Jaro-Winkler). For more information about these methods, see \code{\link[stringdist]{stringdist}}.}
 }
 \value{
 A dataframe. The first dataframe with NA values filled.
@@ -43,6 +36,10 @@ A dataframe. The first dataframe with NA values filled.
 \description{
 This function performs a fuzzy join between two dataframes based on specified matching columns and functions.
 It then fills NA values in the specified columns of the first dataframe with the corresponding values from the second dataframe.
+}
+\details{
+This function uses the \code{\link{within_days}} and \code{\link{match_stringdist}} functions for matching.
+It has dependencies on the \code{fuzzyjoin}, \code{dplyr}, \code{stringdist}, and \code{lubridate} packages.
 }
 \examples{
 \dontrun{
