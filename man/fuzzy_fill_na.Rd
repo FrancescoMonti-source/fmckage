@@ -21,8 +21,7 @@ fuzzy_fill_na(
 
 \item{match_cols}{A character vector. The names of the columns to match on.}
 
-\item{match_fun_list}{A list of functions. The matching functions to use for each column specified in match_cols.
-Each function should return a logical vector indicating the matches.}
+\item{match_fun_list}{A list of functions. The matching functions to use for each column specified in match_cols.}
 
 \item{fill_cols}{A character vector. The names of the columns in df1 to fill NA values in.}
 
@@ -34,12 +33,10 @@ Each function should return a logical vector indicating the matches.}
 A dataframe. The first dataframe with NA values filled.
 }
 \description{
-This function performs a fuzzy join between two dataframes based on specified matching columns and functions.
+This function performs a fuzzy left join between two dataframes based on specified matching columns and functions.
 It then fills NA values in the specified columns of the first dataframe with the corresponding values from the second dataframe.
-}
-\details{
-This function uses the \code{\link{within_days}} and \code{\link{match_stringdist}} functions for matching.
-It has dependencies on the \code{fuzzyjoin}, \code{dplyr}, \code{stringdist}, and \code{lubridate} packages.
+Beware that if a column in the first dataframe is specified in fill_cols or replace_cols arguments but does not exist in the second dataframe,
+the column in the resulting dataframe will be filled with NA values.
 }
 \examples{
 \dontrun{
@@ -64,6 +61,6 @@ match_fun_list <- list(`stringdist::stringdist`, `\%within\%`, `stringdist::stri
 # Define the columns to fill
 fill_cols <- c("id")
 # Perform the fuzzy join and fill NA values
-df_filled <- fuzzy_fill_na(df1, df2, match_cols, match_fun_list, fill_cols, stringdist_threshold = 2, stringdist_method = "jw")
+df_filled <- fuzzy_fill_na(df1, df2, match_cols, match_fun_list, fill_cols)
 }
 }

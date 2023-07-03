@@ -1,20 +1,18 @@
 #' Perform a fuzzy join between two dataframes and fill NA values
 #'
-#' This function performs a fuzzy join between two dataframes based on specified matching columns and functions.
+#' This function performs a fuzzy left join between two dataframes based on specified matching columns and functions.
 #' It then fills NA values in the specified columns of the first dataframe with the corresponding values from the second dataframe.
+#' Beware that if a column in the first dataframe is specified in fill_cols or replace_cols arguments but does not exist in the second dataframe,
+#' the column in the resulting dataframe will be filled with NA values.
 #'
 #' @param df1 A dataframe. The dataframe to fill NA values in.
 #' @param df2 A dataframe. The dataframe to fill NA values from.
 #' @param match_cols A character vector. The names of the columns to match on.
 #' @param match_fun_list A list of functions. The matching functions to use for each column specified in match_cols.
-#' Each function should return a logical vector indicating the matches.
 #' @param fill_cols A character vector. The names of the columns in df1 to fill NA values in.
 #' @param replace_cols A character vector, optional. The names of the columns in df1 to replace values in. Default is NULL.
 #' @param keep_cols A character vector, optional. The names of the columns in df2 to keep in the result. Default is NULL.
 #' @return A dataframe. The first dataframe with NA values filled.
-#' @details
-#' This function uses the \code{\link{within_days}} and \code{\link{match_stringdist}} functions for matching.
-#' It has dependencies on the \code{fuzzyjoin}, \code{dplyr}, \code{stringdist}, and \code{lubridate} packages.
 #' @examples
 #' \dontrun{
 #' # Create some synthetic data
@@ -38,9 +36,10 @@
 #' # Define the columns to fill
 #' fill_cols <- c("id")
 #' # Perform the fuzzy join and fill NA values
-#' df_filled <- fuzzy_fill_na(df1, df2, match_cols, match_fun_list, fill_cols, stringdist_threshold = 2, stringdist_method = "jw")
+#' df_filled <- fuzzy_fill_na(df1, df2, match_cols, match_fun_list, fill_cols)
 #' }
 #' @export
+
 
 
 fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, replace_cols = NULL, keep_cols = NULL) {
@@ -76,8 +75,9 @@ fuzzy_fill_na <- function(df1, df2, match_cols, match_fun_list, fill_cols, repla
     }
 
     # Keep only the original columns from df1 and specified columns from df2
+    original_cols <- names(df1)
     df_filled <- join_result %>%
-        dplyr::select(c(dplyr::ends_with(".x"), keep_cols)) %>%
+        dplyr::select(c(any_of(original_cols),dplyr::ends_with(".x"), keep_cols)) %>%
         dplyr::rename_with(~ gsub("\\.x$", "", .x), -all_of(keep_cols)) %>%
         dplyr::rename_with(~ paste0(gsub("\\.y$", "", .x), "_df2"), all_of(keep_cols))
 
