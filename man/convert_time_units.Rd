@@ -7,42 +7,39 @@
 convert_time_units(time_data, from_unit, to_unit, output_format = "character")
 }
 \arguments{
-\item{time_data}{A numeric vector representing the time values to be converted.}
+\item{time_data}{Numeric vector containing the time values to be converted.}
 
-\item{from_unit}{A character string specifying the unit of the input \code{time_data}. Allowed values: "seconds", "minutes", "hours", "days", "weeks", "months", "years".}
+\item{from_unit}{Character string indicating the original time unit of the \code{time_data}.}
 
-\item{to_unit}{A character string specifying the desired output unit. Allowed values: "seconds", "minutes", "hours", "days", "weeks", "months", "years".}
+\item{to_unit}{Character string indicating the target time unit to which the \code{time_data} should be converted.}
 
-\item{output_format}{A character string specifying the desired output format. Allowed values: "character" (default), "period", or "duration".}
+\item{output_format}{Character string specifying the desired output format. Possible values are "character" (default), "period", or "duration".}
 }
 \value{
-A character string, lubridate period, or duration representing the converted time units, based on the \code{output_format}.
+Depending on the \code{output_format}, the function returns either a character vector with formatted time values, a 'lubridate' period object, or a 'lubridate' duration object.
 }
 \description{
-This function converts time units between different scales such as seconds, minutes, hours, days, weeks, months, and years.
+Convert time values between different units such as years, months, weeks, days, hours, minutes, and seconds.
 }
 \details{
-The function provides three different output formats:
-\itemize{
-  \item "character" (default): Returns the result as a character string in the format "x unit y months", where "x" is the whole number of units and "y" is the fractional part in months.
-  \item "period": Returns the result as a lubridate period object representing the converted time units.
-  \item "duration": Returns the result as a lubridate duration object representing the converted time units.
-}
+This function allows for the conversion of time data between different units, such as years, months, weeks, days, hours, minutes, and seconds. It utilizes the 'lubridate' package to facilitate the conversions. If the package is not installed, it will be automatically installed and loaded upon function call. If the 'lubridate' package is already installed but not loaded, the function will load it.
+
+The function takes a numeric vector of time values (\code{time_data}), the original time unit of the data (\code{from_unit}), and the target time unit for the conversion (\code{to_unit}). The result can be returned as a character string with a formatted time representation ("character"), as a 'lubridate' period object ("period"), or as a 'lubridate' duration object ("duration").
+
+Note: For precise time calculations, this function uses approximate values for the number of seconds in a month and a year.
 }
 \examples{
-# Convert 182 months to years and months in character format
-convert_time_units(182, "months", "years")
-
-# Convert 182 months to years and months as a lubridate period object
-convert_time_units(182, "months", "years", output_format = "period")
-
-# Convert 182 months to years and months as a lubridate duration object
-convert_time_units(182, "months", "years", output_format = "duration")
+convert_time_units(18, "months", "years", output_format = "character")
+convert_time_units(181, "months", "years", output_format = "period")
+convert_time_units(181, "months", "years", output_format = "duration")
 
 }
+\seealso{
+\code{\link[lubridate]{period}}, \code{\link[lubridate]{duration}}
+}
+\author{
+Your Name
+}
 \keyword{conversion}
-\keyword{duration}
 \keyword{lubridate}
-\keyword{period}
 \keyword{time}
-\keyword{units}

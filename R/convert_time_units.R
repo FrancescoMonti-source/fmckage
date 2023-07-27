@@ -1,92 +1,96 @@
 #' Convert Time Units
 #'
-#' This function converts time units between different scales such as seconds, minutes, hours, days, weeks, months, and years.
+#' Convert time values between different units such as years, months, weeks, days, hours, minutes, and seconds.
 #'
-#' @param time_data A numeric vector representing the time values to be converted.
-#' @param from_unit A character string specifying the unit of the input \code{time_data}. Allowed values: "seconds", "minutes", "hours", "days", "weeks", "months", "years".
-#' @param to_unit A character string specifying the desired output unit. Allowed values: "seconds", "minutes", "hours", "days", "weeks", "months", "years".
-#' @param output_format A character string specifying the desired output format. Allowed values: "character" (default), "period", or "duration".
+#' @param time_data Numeric vector containing the time values to be converted.
+#' @param from_unit Character string indicating the original time unit of the \code{time_data}.
+#' @param to_unit Character string indicating the target time unit to which the \code{time_data} should be converted.
+#' @param output_format Character string specifying the desired output format. Possible values are "character" (default), "period", or "duration".
 #'
-#' @return A character string, lubridate period, or duration representing the converted time units, based on the \code{output_format}.
+#' @details This function allows for the conversion of time data between different units, such as years, months, weeks, days, hours, minutes, and seconds. It utilizes the 'lubridate' package to facilitate the conversions. If the package is not installed, it will be automatically installed and loaded upon function call. If the 'lubridate' package is already installed but not loaded, the function will load it.
 #'
-#' @details The function provides three different output formats:
-#' \itemize{
-#'   \item "character" (default): Returns the result as a character string in the format "x unit y months", where "x" is the whole number of units and "y" is the fractional part in months.
-#'   \item "period": Returns the result as a lubridate period object representing the converted time units.
-#'   \item "duration": Returns the result as a lubridate duration object representing the converted time units.
-#' }
+#' The function takes a numeric vector of time values (\code{time_data}), the original time unit of the data (\code{from_unit}), and the target time unit for the conversion (\code{to_unit}). The result can be returned as a character string with a formatted time representation ("character"), as a 'lubridate' period object ("period"), or as a 'lubridate' duration object ("duration").
+#'
+#' Note: For precise time calculations, this function uses approximate values for the number of seconds in a month and a year.
+#'
+#' @return Depending on the \code{output_format}, the function returns either a character vector with formatted time values, a 'lubridate' period object, or a 'lubridate' duration object.
 #'
 #' @examples
-#' # Convert 182 months to years and months in character format
-#' convert_time_units(182, "months", "years")
+#' convert_time_units(18, "months", "years", output_format = "character")
+#' convert_time_units(181, "months", "years", output_format = "period")
+#' convert_time_units(181, "months", "years", output_format = "duration")
 #'
-#' # Convert 182 months to years and months as a lubridate period object
-#' convert_time_units(182, "months", "years", output_format = "period")
+#' @importFrom lubridate as.duration
+#' @importFrom lubridate as.period
+#' @importFrom lubridate duration
+#' @importFrom lubridate period
+#' @importFrom lubridate update
 #'
-#' # Convert 182 months to years and months as a lubridate duration object
-#' convert_time_units(182, "months", "years", output_format = "duration")
+#' @seealso \code{\link[lubridate]{period}}, \code{\link[lubridate]{duration}}
 #'
-#' @import lubridate
-#' @importFrom utils readline
+#' @author Your Name
 #'
-#' @keywords time units conversion lubridate period duration
-#'
+#' @keywords time conversion lubridate
 #' @export
 
-convert_time_units <- function (time_data, from_unit, to_unit, output_format = "character")
-{
-    if (!requireNamespace("lubridate", quietly = TRUE)) {
-        cat("The 'lubridate' package is not installed.\n")
-        install_choice <- readline(prompt = "Do you want to install and load it? (y/n): ")
-        if (tolower(install_choice) == "y") {
-            install.packages("lubridate")
-            if (!requireNamespace("lubridate", quietly = TRUE)) {
-                stop("Failed to install 'lubridate'. Please install it manually and try again.")
-            }
-            else {
-                library(lubridate)
-                cat("The 'lubridate' package has been installed and loaded successfully.\n")
-            }
-        }
-        else {
-            stop("The 'lubridate' package is required for this function. Please install it manually and try again.")
-        }
-    }
-    else {
-        if (!requireNamespace("lubridate", quietly = TRUE)) {
-            library(lubridate)
-            cat("The 'lubridate' package has been loaded successfully.\n")
-        }
-    }
-    unit_in_seconds <- c(seconds = 1, minutes = 60, hours = 3600,
-                         days = 86400, weeks = 604800, months = 2628000, years = 31536000)
+convert_time_units <- function(time_data, from_unit, to_unit, output_format = "character") {
+    unit_in_seconds <- c(
+        seconds = 1,
+        minutes = 60,
+        hours = 3600,
+        days = 86400,
+        weeks = 604800,
+        months = 2628000,  # Approximate seconds in a month
+        years = 31536000  # Approximate seconds in a year
+    )
+
     time_in_seconds <- time_data * unit_in_seconds[[from_unit]]
-    result <- time_in_seconds/unit_in_seconds[[to_unit]]
+    result <- time_in_seconds / unit_in_seconds[[to_unit]]
+
     whole_units <- floor(result)
     fractional_part <- result - whole_units
 
-    # output == character
-    if (output_format == "character") {
-        result_str <- paste(whole_units, to_unit)
-        if (fractional_part > 0) {
-            fractional_months <- round(fractional_part * 12)
-            result_str <- paste(result_str, fractional_months,
-                                "months")
+    # Function to get the appropriate unit for the fractional part
+    get_smaller_unit <- function(units) {
+        switch(units,
+               "years" = "months",
+               "months" = "weeks",
+               "weeks" = "days",
+               "days" = "hours",
+               "hours" = "minutes",
+               "minutes" = "seconds",
+               "seconds" = NA
+        )
+    }
+
+    # Function to get concise time unit representation
+    get_time_unit_symbol <- function(units) {
+        switch(units,
+               "years" = "y",
+               "months" = "m",
+               "weeks" = "w",
+               "days" = "d",
+               "hours" = "H",
+               "minutes" = "M",
+               "seconds" = "S"
+        )
+    }
+
+    # Construct the result string dynamically based on the target unit
+    result_str <- paste0(whole_units, get_time_unit_symbol(to_unit))
+    if (any(fractional_part > 0)) {
+        smaller_unit <- get_smaller_unit(to_unit)
+        while (!is.na(smaller_unit) && any(fractional_part > 0)) {
+            fractional_part <- fractional_part * unit_in_seconds[[smaller_unit]] / unit_in_seconds[[to_unit]]
+            result_str <- paste0(result_str, " ", round(fractional_part, 2), get_time_unit_symbol(smaller_unit))
+            smaller_unit <- get_smaller_unit(smaller_unit)
         }
-        result_str[is.na(time_data)] = NA
+    }
+
+    if (output_format == "character") {
         return(result_str)
     }
-    # output == period
-    if (output_format == "period") {
-        period <- as.period(result_str)
-        period[is.na(time_data)] = NA
-        return(period)
-    }
-    # output == duration
-    if (output_format == "duration") {
-        duration <- as.duration(result_str)
-        duration[is.na(time_data)] = NA
-        return(duration)
-    }
-    stop("Invalid 'output_format' specified. Use 'character', 'period', or 'duration'.")
+
+    stop("Invalid 'output_format' specified or unsupported target unit.")
 }
+
