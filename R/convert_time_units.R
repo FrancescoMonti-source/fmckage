@@ -33,68 +33,60 @@
 #'
 #' @export
 
-convert_time_units <- function(time_data, from_unit, to_unit, output_format = "character") {
-    # Check if lubridate is already loaded, else attempt to load it
+convert_time_units <- function (time_data, from_unit, to_unit, output_format = "character")
+{
     if (!requireNamespace("lubridate", quietly = TRUE)) {
-        # Ask for user confirmation to install the package
         cat("The 'lubridate' package is not installed.\n")
         install_choice <- readline(prompt = "Do you want to install and load it? (y/n): ")
-
         if (tolower(install_choice) == "y") {
             install.packages("lubridate")
-            # Load lubridate
             if (!requireNamespace("lubridate", quietly = TRUE)) {
                 stop("Failed to install 'lubridate'. Please install it manually and try again.")
-            } else {
+            }
+            else {
                 library(lubridate)
                 cat("The 'lubridate' package has been installed and loaded successfully.\n")
             }
-        } else {
+        }
+        else {
             stop("The 'lubridate' package is required for this function. Please install it manually and try again.")
         }
-    } else {
-        # Load lubridate if it's installed but not loaded
+    }
+    else {
         if (!requireNamespace("lubridate", quietly = TRUE)) {
             library(lubridate)
             cat("The 'lubridate' package has been loaded successfully.\n")
         }
     }
-
-    # Main body
-    unit_in_seconds <- c(
-        seconds = 1,
-        minutes = 60,
-        hours = 3600,
-        days = 86400,
-        weeks = 604800,
-        months = 2628000,  # Approximate seconds in a month
-        years = 31536000  # Approximate seconds in a year
-    )
-
+    unit_in_seconds <- c(seconds = 1, minutes = 60, hours = 3600,
+                         days = 86400, weeks = 604800, months = 2628000, years = 31536000)
     time_in_seconds <- time_data * unit_in_seconds[[from_unit]]
-    result <- time_in_seconds / unit_in_seconds[[to_unit]]
-
+    result <- time_in_seconds/unit_in_seconds[[to_unit]]
     whole_units <- floor(result)
     fractional_part <- result - whole_units
 
+    # output == character
     if (output_format == "character") {
         result_str <- paste(whole_units, to_unit)
         if (fractional_part > 0) {
             fractional_months <- round(fractional_part * 12)
-            result_str <- paste(result_str, fractional_months, "months")
+            result_str <- paste(result_str, fractional_months,
+                                "months")
         }
+        result_str[is.na(time_data)] = NA
         return(result_str)
     }
-
+    # output == period
     if (output_format == "period") {
         period <- as.period(result_str)
+        period[is.na(time_data)] = NA
         return(period)
     }
-
+    # output == duration
     if (output_format == "duration") {
         duration <- as.duration(result_str)
+        duration[is.na(time_data)] = NA
         return(duration)
     }
-
     stop("Invalid 'output_format' specified. Use 'character', 'period', or 'duration'.")
 }
