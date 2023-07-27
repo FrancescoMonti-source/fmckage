@@ -34,6 +34,7 @@
 #' @export
 
 convert_time_units <- function(time_data, from_unit, to_unit, output_format = "character") {
+
     unit_in_seconds <- c(
         seconds = 1,
         minutes = 60,
@@ -48,7 +49,7 @@ convert_time_units <- function(time_data, from_unit, to_unit, output_format = "c
     result <- time_in_seconds / unit_in_seconds[[to_unit]]
 
     whole_units <- floor(result)
-    fractional_part <- result - whole_units
+    fractional_part_seconds <- (result - whole_units) * unit_in_seconds[[to_unit]]
 
     # Function to get the appropriate unit for the fractional part
     get_smaller_unit <- function(units) {
@@ -78,11 +79,12 @@ convert_time_units <- function(time_data, from_unit, to_unit, output_format = "c
 
     # Construct the result string dynamically based on the target unit
     result_str <- paste0(whole_units, get_time_unit_symbol(to_unit))
-    if (any(fractional_part > 0)) {
+    if (any(fractional_part_seconds > 0)) {
         smaller_unit <- get_smaller_unit(to_unit)
-        while (!is.na(smaller_unit) && any(fractional_part > 0)) {
-            fractional_part <- fractional_part * unit_in_seconds[[smaller_unit]] / unit_in_seconds[[to_unit]]
-            result_str <- paste0(result_str, " ", round(fractional_part, 2), get_time_unit_symbol(smaller_unit))
+        while (!is.na(smaller_unit) && any(fractional_part_seconds > 0)) {
+            fractional_part <- fractional_part_seconds / unit_in_seconds[[smaller_unit]]
+            result_str <- paste0(result_str, " ", floor(fractional_part), get_time_unit_symbol(smaller_unit))
+            fractional_part_seconds <- (fractional_part_seconds %% unit_in_seconds[[smaller_unit]])
             smaller_unit <- get_smaller_unit(smaller_unit)
         }
     }
