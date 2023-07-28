@@ -7,6 +7,7 @@
 #'             Allowed values: "years", "months", "days", "hours", "minutes", "seconds".
 #' @param to Character vector specifying the desired time units for the output.
 #'           Allowed values: "years", "months", "days", "hours", "minutes", "seconds".
+#' @param warn_residual logical. If TRUE, displays a warning message when there's a residual time not displayed in the output units. Default is TRUE.
 #' @return Character string representing the time value in the specified time units.
 #' @details This function converts a given time value \code{x} from one time unit to another,
 #'          as specified by the \code{from} and \code{to} parameters. It handles conversions
@@ -21,7 +22,7 @@
 #' @importFrom stats floor
 #' @export
 
-convert_time <- function (x, from = NULL, to = NULL)
+convert_time <- function (x, from = NULL, to = NULL, warn_residual = TRUE)
 {
     if (is.null(from) || is.null(to)) {
         stop("Please specify both 'from' and 'to' parameters.")
@@ -38,7 +39,7 @@ convert_time <- function (x, from = NULL, to = NULL)
     }
     if (x_seconds >= 1) {
         residual_time <- convert_time(x_seconds, from = "seconds", to = names(time_units))
-        if (grepl("\\d", residual_time)) {
+        if (warn_residual && grepl("\\d", residual_time)) {
             message("There is still a residual part amounting to ", residual_time, " not being displayed.")
         }
     }

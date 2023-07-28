@@ -4,7 +4,7 @@
 \alias{convert_time}
 \title{Convert Time Units}
 \usage{
-convert_time(x, from = NULL, to = NULL)
+convert_time(x, from = NULL, to = NULL, warn_residual = TRUE)
 }
 \arguments{
 \item{x}{Numeric value representing the time duration or interval.}
@@ -14,6 +14,8 @@ Allowed values: "years", "months", "days", "hours", "minutes", "seconds".}
 
 \item{to}{Character vector specifying the desired time units for the output.
 Allowed values: "years", "months", "days", "hours", "minutes", "seconds".}
+
+\item{warn_residual}{logical. If TRUE, displays a warning message when there's a residual time not displayed in the output units. Default is TRUE.}
 }
 \value{
 Character string representing the time value in the specified time units.
