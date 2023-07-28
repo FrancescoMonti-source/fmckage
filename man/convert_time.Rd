@@ -7,36 +7,31 @@
 convert_time(x, from = NULL, to = NULL)
 }
 \arguments{
-\item{x}{Numeric value representing the time duration.}
+\item{x}{Numeric value representing the time duration or interval.}
 
-\item{from}{Character string indicating the starting time unit.
-Possible values: "years", "months", "days", "hours", "minutes", "seconds".}
+\item{from}{Character string specifying the time unit of the input \code{x}.
+Allowed values: "years", "months", "days", "hours", "minutes", "seconds".}
 
-\item{to}{Character vector indicating the desired time units for conversion.
-Possible values: "years", "months", "days", "hours", "minutes", "seconds".}
+\item{to}{Character vector specifying the desired time units for the output.
+Allowed values: "years", "months", "days", "hours", "minutes", "seconds".}
 }
 \value{
-Character string representing the converted time duration in the specified units.
+Character string representing the time value in the specified time units.
 }
 \description{
-Converts a given time value from one unit to another.
+Convert a given time value from one time unit to another.
 }
 \details{
-This function converts a given time value 'x' from one time unit to another.
-         The 'from' parameter specifies the starting time unit of 'x', and the 'to'
-         parameter specifies the desired time units for the conversion. The function
-         returns a character string representing the converted time duration in the
-         specified units.
-}
-\note{
-The 'from' and 'to' parameters must be specified to avoid any possible mistakes.
-      If any of them are missing, the function will throw an error message.
+This function converts a given time value \code{x} from one time unit to another,
+         as specified by the \code{from} and \code{to} parameters. It handles conversions
+         between various time units, such as years, months, days, hours, minutes, and seconds.
+         The output string includes the numeric amount and the first letter of the time unit.
 }
 \examples{
-convert_time(9000, from = "seconds", to = c("hours", "minutes"))
-# Returns: "2h 30m"
-
-convert_time(1.22, from = "years", to = c("days", "hours", "minutes"))
-# Returns: "445d 14h 48m"
-
+convert_time(9000, "seconds", c("days", "hours"))  # Output: "2d 30h"
+convert_time(1.22, "years", c("days", "hours", "minutes"))  # Output: "445d 14h 48m"
+convert_time(1.22, "years", "months")  # Output: "14m"
+}
+\seealso{
+\code{\link{lubridate::pretty}} for an alternative method to display time durations.
 }

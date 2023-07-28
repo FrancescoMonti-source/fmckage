@@ -1,33 +1,25 @@
 #' Convert Time Units
 #'
-#' Converts a given time value from one unit to another.
+#' Convert a given time value from one time unit to another.
 #'
-#' @param x Numeric value representing the time duration.
-#' @param from Character string indicating the starting time unit.
-#'             Possible values: "years", "months", "days", "hours", "minutes", "seconds".
-#' @param to Character vector indicating the desired time units for conversion.
-#'           Possible values: "years", "months", "days", "hours", "minutes", "seconds".
-#' @return Character string representing the converted time duration in the specified units.
-#' @details This function converts a given time value 'x' from one time unit to another.
-#'          The 'from' parameter specifies the starting time unit of 'x', and the 'to'
-#'          parameter specifies the desired time units for the conversion. The function
-#'          returns a character string representing the converted time duration in the
-#'          specified units.
+#' @param x Numeric value representing the time duration or interval.
+#' @param from Character string specifying the time unit of the input \code{x}.
+#'             Allowed values: "years", "months", "days", "hours", "minutes", "seconds".
+#' @param to Character vector specifying the desired time units for the output.
+#'           Allowed values: "years", "months", "days", "hours", "minutes", "seconds".
+#' @return Character string representing the time value in the specified time units.
+#' @details This function converts a given time value \code{x} from one time unit to another,
+#'          as specified by the \code{from} and \code{to} parameters. It handles conversions
+#'          between various time units, such as years, months, days, hours, minutes, and seconds.
+#'          The output string includes the numeric amount and the first letter of the time unit.
 #' @examples
-#' convert_time(9000, from = "seconds", to = c("hours", "minutes"))
-#' # Returns: "2h 30m"
-#'
-#' convert_time(1.22, from = "years", to = c("days", "hours", "minutes"))
-#' # Returns: "445d 14h 48m"
-#'
-#' @note The 'from' and 'to' parameters must be specified to avoid any possible mistakes.
-#'       If any of them are missing, the function will throw an error message.
-#'
+#' convert_time(9000, "seconds", c("days", "hours"))  # Output: "2d 30h"
+#' convert_time(1.22, "years", c("days", "hours", "minutes"))  # Output: "445d 14h 48m"
+#' convert_time(1.22, "years", "months")  # Output: "14m"
+#' @seealso \code{\link{lubridate::pretty}} for an alternative method to display time durations.
+#' @importFrom lubridate seconds minutes hours days
+#' @importFrom stats floor
 #' @export
-convert_time <- function(x, from = NULL, to = NULL) {
-    # Function implementation (as provided earlier)
-}
-
 
 convert_time <- function(x, from = NULL, to = NULL) {
     if (is.null(from) || is.null(to)) {
@@ -61,6 +53,14 @@ convert_time <- function(x, from = NULL, to = NULL) {
         }
     }
 
+    # Handle the residual part by calling convert_time recursively on the remaining seconds
+    if (x_seconds > 0) {
+        residual_time <- convert_time(x_seconds, from = "seconds", to = names(time_units))
+        if (grepl("\\d", residual_time)) {
+            message("There is still a residual part amounting to ", residual_time, " not being displayed.")
+        }
+    }
+
     # Combine the amounts and units into a single string
     result <- sapply(names(output), function(unit) {
         amount <- output[[unit]]
@@ -71,3 +71,4 @@ convert_time <- function(x, from = NULL, to = NULL) {
 
     paste(result, collapse = " ")
 }
+
