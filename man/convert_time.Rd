@@ -2,38 +2,28 @@
 % Please edit documentation in R/convert_time.R
 \name{convert_time}
 \alias{convert_time}
-\title{Convert Time Units}
+\title{Convert time units}
 \usage{
 convert_time(x, from = NULL, to = NULL, warn_residual = TRUE)
 }
 \arguments{
-\item{x}{Numeric value representing the time duration or interval.}
+\item{x}{A numeric vector, the time durations to be converted.}
 
-\item{from}{Character string specifying the time unit of the input \code{x}.
-Allowed values: "years", "months", "days", "hours", "minutes", "seconds".}
+\item{from}{A character string, the unit of the input time durations. It should be one of "seconds", "minutes", "hours", "days", "months", or "years".}
 
-\item{to}{Character vector specifying the desired time units for the output.
-Allowed values: "years", "months", "days", "hours", "minutes", "seconds".}
+\item{to}{A character vector, the units to which the input time durations should be converted. It should contain one or more of "seconds", "minutes", "hours", "days", "months", or "years".}
 
-\item{warn_residual}{logical. If TRUE, displays a warning message when there's a residual time not displayed in the output units. Default is TRUE.}
+\item{warn_residual}{A logical value, if TRUE, a warning is printed when there is a residual part not being displayed due to the chosen 'to' units.}
 }
 \value{
-Character string representing the time value in the specified time units.
+A character vector of the converted time durations. Each element is a string that concatenates the converted time durations in the units specified by 'to', in the order they are given.
 }
 \description{
-Convert a given time value from one time unit to another.
-}
-\details{
-This function converts a given time value \code{x} from one time unit to another,
-         as specified by the \code{from} and \code{to} parameters. It handles conversions
-         between various time units, such as years, months, days, hours, minutes, and seconds.
-         The output string includes the numeric amount and the first letter of the time unit.
+This function converts a time duration from one unit to one or more other units.
+The conversion is performed separately for each element in the input vector, and the results are returned as a vector of character strings.
+The input can contain NA values, which are returned as NA in the output.
 }
 \examples{
-convert_time(9000, "seconds", c("days", "hours"))  # Output: "2d 30h"
-convert_time(1.22, "years", c("days", "hours", "minutes"))  # Output: "445d 14h 48m"
-convert_time(1.22, "years", "months")  # Output: "14m"
-}
-\seealso{
-\code{\link{lubridate::pretty}} for an alternative method to display time durations.
+convert_time(90, from = "seconds", to = c("minutes", "seconds")) # "1m 30s"
+convert_time(c(90, 3600), from = "seconds", to = c("hours", "minutes", "seconds")) # "0h 1m 30s" "1h 0m 0s"
 }

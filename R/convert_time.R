@@ -1,26 +1,19 @@
-#' Convert Time Units
+#' Convert time units
 #'
-#' Convert a given time value from one time unit to another.
+#' This function converts a time duration from one unit to one or more other units.
+#' The conversion is performed separately for each element in the input vector, and the results are returned as a vector of character strings.
+#' The input can contain NA values, which are returned as NA in the output.
 #'
-#' @param x Numeric value representing the time duration or interval.
-#' @param from Character string specifying the time unit of the input \code{x}.
-#'             Allowed values: "years", "months", "days", "hours", "minutes", "seconds".
-#' @param to Character vector specifying the desired time units for the output.
-#'           Allowed values: "years", "months", "days", "hours", "minutes", "seconds".
-#' @param warn_residual logical. If TRUE, displays a warning message when there's a residual time not displayed in the output units. Default is TRUE.
-#' @return Character string representing the time value in the specified time units.
-#' @details This function converts a given time value \code{x} from one time unit to another,
-#'          as specified by the \code{from} and \code{to} parameters. It handles conversions
-#'          between various time units, such as years, months, days, hours, minutes, and seconds.
-#'          The output string includes the numeric amount and the first letter of the time unit.
+#' @param x A numeric vector, the time durations to be converted.
+#' @param from A character string, the unit of the input time durations. It should be one of "seconds", "minutes", "hours", "days", "months", or "years".
+#' @param to A character vector, the units to which the input time durations should be converted. It should contain one or more of "seconds", "minutes", "hours", "days", "months", or "years".
+#' @param warn_residual A logical value, if TRUE, a warning is printed when there is a residual part not being displayed due to the chosen 'to' units.
+#' @return A character vector of the converted time durations. Each element is a string that concatenates the converted time durations in the units specified by 'to', in the order they are given.
 #' @examples
-#' convert_time(9000, "seconds", c("days", "hours"))  # Output: "2d 30h"
-#' convert_time(1.22, "years", c("days", "hours", "minutes"))  # Output: "445d 14h 48m"
-#' convert_time(1.22, "years", "months")  # Output: "14m"
-#' @seealso \code{\link{lubridate::pretty}} for an alternative method to display time durations.
-#' @importFrom lubridate seconds minutes hours days
-#' @importFrom stats floor
+#' convert_time(90, from = "seconds", to = c("minutes", "seconds")) # "1m 30s"
+#' convert_time(c(90, 3600), from = "seconds", to = c("hours", "minutes", "seconds")) # "0h 1m 30s" "1h 0m 0s"
 #' @export
+
 
 convert_time <- function (x, from = NULL, to = NULL, warn_residual = TRUE)
 {
@@ -29,26 +22,31 @@ convert_time <- function (x, from = NULL, to = NULL, warn_residual = TRUE)
     }
     time_units <- c(years = 60 * 60 * 24 * 365.25, months = 60 * 60 * 24 * 30.44, days = 60 * 60 * 24, hours = 60 * 60, minutes = 60, seconds = 1)
     x_seconds <- x * time_units[from]
-    output <- list()
-    for (unit in to) {
-        amount <- floor(x_seconds/time_units[unit])
-        x_seconds <- x_seconds %% time_units[unit]
-        if (amount > 0) {
-            output[[unit]] <- amount
+    output <- vector("list", length(x_seconds))
+    for (i in seq_along(x_seconds)) {
+        time_remaining <- x_seconds[i]
+        unit_values <- list()
+        for (unit in to) {
+            if (!is.na(time_remaining)) {
+                amount <- floor(time_remaining/time_units[unit])
+                time_remaining <- time_remaining %% time_units[unit]
+                if (amount > 0) {
+                    unit_values[[unit]] <- amount
+                }
+            }
         }
+        output[[i]] <- unit_values
     }
-    if (x_seconds >= 1) {
-        residual_time <- convert_time(x_seconds, from = "seconds", to = names(time_units))
-        if (warn_residual && grepl("\\d", residual_time)) {
-            message("There is still a residual part amounting to ", residual_time, " not being displayed.")
-        }
-    }
-    result <- sapply(names(output), function(unit) {
-        amount <- output[[unit]]
-        if (!is.null(amount)) {
-            paste0(amount, substr(unit, 1, 1))
+    output <- lapply(output, function(units) {
+        if (length(units) > 0) {
+            return(paste0(mapply(function(value, unit) {
+                paste(value, substr(unit, 1, 1))
+            }, units, names(units)), collapse = " "))
+        } else {
+            return(NA)
         }
     })
-    paste(result, collapse = " ")
+    unlist(output)
 }
+
 
