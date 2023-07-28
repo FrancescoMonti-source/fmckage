@@ -21,54 +21,33 @@
 #' @importFrom stats floor
 #' @export
 
-convert_time <- function(x, from = NULL, to = NULL) {
+convert_time <- function (x, from = NULL, to = NULL)
+{
     if (is.null(from) || is.null(to)) {
         stop("Please specify both 'from' and 'to' parameters.")
     }
-
-    time_units <- c("years" = 60 * 60 * 24 * 365.25,
-                    "months" = 60 * 60 * 24 * 30.44,
-                    "days" = 60 * 60 * 24,
-                    "hours" = 60 * 60,
-                    "minutes" = 60,
-                    "seconds" = 1)
-
-    # Convert the input to seconds (smallest unit)
+    time_units <- c(years = 60 * 60 * 24 * 365.25, months = 60 * 60 * 24 * 30.44, days = 60 * 60 * 24, hours = 60 * 60, minutes = 60, seconds = 1)
     x_seconds <- x * time_units[from]
-
-    # Initialize an empty list to store the output
     output <- list()
-
-    # Calculate the amount for each unit in the desired units
     for (unit in to) {
-        # Calculate the amount for this unit
-        amount <- floor(x_seconds / time_units[unit])
-
-        # Update the remaining seconds for the next iteration
+        amount <- floor(x_seconds/time_units[unit])
         x_seconds <- x_seconds %% time_units[unit]
-
-        # Store the amount and unit in the output list if it is greater than 0
         if (amount > 0) {
             output[[unit]] <- amount
         }
     }
-
-    # Handle the residual part by calling convert_time recursively on the remaining seconds
-    if (x_seconds > 0) {
+    if (x_seconds >= 1) {
         residual_time <- convert_time(x_seconds, from = "seconds", to = names(time_units))
         if (grepl("\\d", residual_time)) {
             message("There is still a residual part amounting to ", residual_time, " not being displayed.")
         }
     }
-
-    # Combine the amounts and units into a single string
     result <- sapply(names(output), function(unit) {
         amount <- output[[unit]]
         if (!is.null(amount)) {
             paste0(amount, substr(unit, 1, 1))
         }
     })
-
     paste(result, collapse = " ")
 }
 
