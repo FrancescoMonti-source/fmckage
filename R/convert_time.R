@@ -40,7 +40,7 @@ convert_time <- function (x, from = NULL, to = NULL, warn_residual = TRUE)
     output <- lapply(output, function(units) {
         if (length(units) > 0) {
             return(paste0(mapply(function(value, unit) {
-                paste(value, substr(unit, 1, 1))
+                paste0(value, substr(unit, 1, 1))
             }, units, names(units)), collapse = " "))
         } else {
             return(NA)
