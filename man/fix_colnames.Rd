@@ -7,15 +7,15 @@
 fix_colnames(df)
 }
 \arguments{
-\item{df}{A dataframe whose column names need to be fixed.}
+\item{df}{A dataframe whose column names need to be "fixed".}
 }
 \value{
 A dataframe with fixed column names.
 }
 \description{
-This function trims whitespace, replaces dots with underscores,
-transforms to lowercase, and removes diacritic characters from
-the column names of a given dataframe.
+This function take a *df* as argument and return a *df* with modified *colnames* to make it easier to work with
+variable names. Here's what it does: trims whitespace, replaces punctuation with underscores, transforms to lowercase,
+and removes diacritic characters from the column names of the given dataframe.
 }
 \examples{
 df <- data.frame("A .column " = 1:5, "b.Column" = 6:10, check.names = FALSE)
