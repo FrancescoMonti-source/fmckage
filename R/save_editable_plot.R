@@ -6,7 +6,8 @@
 #'
 #' @param plot The ggplot2 plot to be saved.
 #' @param filename A character string specifying the name of the PowerPoint file to be created (without the .pptx extension).
-#' @param path A character string specifying the directory where the PowerPoint file should be saved. Defaults to the current working directory.
+#' @param path A character string specifying the directory where the PowerPoint file should be saved.
+#' Defaults is create a new directory called "graphs" under the current working directory which is in accordance with the ProjectTemplate folders arborescence.
 #'
 #' @return A PowerPoint file containing the ggplot2 plot as an editable graphic is saved to the specified directory.
 #'
@@ -20,7 +21,7 @@
 #'
 #' @export
 
-save_editable_plot <- function(plot, filename, path = "your_path_to_save_files") {
+save_editable_plot <- function(plot, filename, path = "graphs/") {
 
     # List of necessary packages
     necessary_packages <- c("ggplot2", "officer", "rvg")
