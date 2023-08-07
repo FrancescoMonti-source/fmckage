@@ -21,7 +21,7 @@
 #'
 #' @export
 
-save_editable_plot <- function(plot, filename, path = "graphs/") {
+save_editable_plot <- function(plot, filename, path = "../graphs/") {
 
     # List of necessary packages
     necessary_packages <- c("ggplot2", "officer", "rvg")
