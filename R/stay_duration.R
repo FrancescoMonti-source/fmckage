@@ -18,8 +18,6 @@
 #' @import dplyr
 #' @import purrr
 #' @import lubridate
-stay_duration <- function(data, id_col, start_col, end_col) {
-    # function body
     stay_duration <- function(data, id_col, start_col, end_col) {
         data %>%
             mutate(
@@ -32,4 +30,4 @@ stay_duration <- function(data, id_col, start_col, end_col) {
             mutate(unioned = map(sequences, ~ reduce(.x, union))) %>%
             summarise(total_duration = length(unique(unlist(unioned[1]))))
     }
-}
+
