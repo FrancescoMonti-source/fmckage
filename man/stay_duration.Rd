@@ -20,7 +20,7 @@ A dataframe with each unique identifier from `id_col` and the corresponding
         total duration of stays.
 }
 \description{
-Computes the total duration of stays in a hospital or similar settings,
+Computes the total duration of stays (nights spent) in a hospital or similar settings,
 accounting for overlapping and non-overlapping intervals.
 }
 \examples{

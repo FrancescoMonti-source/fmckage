@@ -1,6 +1,6 @@
 #' Calculate Total Stay Duration
 #'
-#' Computes the total duration of stays in a hospital or similar settings,
+#' Computes the total duration of stays (nights spent) in a hospital or similar settings,
 #' accounting for overlapping and non-overlapping intervals.
 #'
 #' @param data A dataframe containing the stay data.
