@@ -28,6 +28,6 @@
             group_by(!!sym(id_col)) %>%
             summarise(sequences = list(map2(start, end, seq)), .groups = 'keep') %>%
             mutate(unioned = map(sequences, ~ reduce(.x, union))) %>%
-            summarise(new_col_name = length(unique(unlist(unioned[1])))-1)
+            summarise(!!sym(new_col_name) := length(unique(unlist(unioned[1])))-1)
     }
 
