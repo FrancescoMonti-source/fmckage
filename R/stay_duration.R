@@ -18,7 +18,7 @@
 #' @import dplyr
 #' @import purrr
 #' @import lubridate
-    stay_duration <- function(data, id_col, start_col, end_col) {
+    stay_duration <- function(data, id_col, start_col, end_col, new_col_name = "stay_duration") {
         data %>%
             mutate(
                 start = as.numeric(as.Date(!!sym(start_col))),
@@ -28,6 +28,6 @@
             group_by(!!sym(id_col)) %>%
             summarise(sequences = list(map2(start, end, seq)), .groups = 'keep') %>%
             mutate(unioned = map(sequences, ~ reduce(.x, union))) %>%
-            summarise(total_duration = length(unique(unlist(unioned[1])))-1)
+            summarise(new_col_name = length(unique(unlist(unioned[1])))-1)
     }
 
