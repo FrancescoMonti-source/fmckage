@@ -4,7 +4,7 @@
 \alias{stay_duration}
 \title{Calculate Total Stay Duration}
 \usage{
-stay_duration(data, id_col, start_col, end_col)
+stay_duration(data, id_col, start_col, end_col, new_col_name = "stay_duration")
 }
 \arguments{
 \item{data}{A dataframe containing the stay data.}
