@@ -4,7 +4,7 @@
 \alias{ffreq}
 \title{ffreq: Function to compute frequency counts and percentages}
 \usage{
-ffreq(data, vars, group_vars = NULL, na.rm = TRUE)
+ffreq(data, vars, group_vars = NULL, na.rm = F)
 }
 \arguments{
 \item{data}{A data frame containing the data.}

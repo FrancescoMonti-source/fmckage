@@ -33,7 +33,7 @@
 #' @import tibble
 #' @export
 
-ffreq <- function(data, vars, group_vars = NULL, na.rm = TRUE) {
+ffreq <- function(data, vars, group_vars = NULL, na.rm = F) {
     # Helper function to calculate frequencies for a single column
     calculate_frequencies_for_column <- function(data, column, group_vars, na.rm) {
         if (!is.null(group_vars)) {
