@@ -53,7 +53,7 @@ Mark Gardener 2015 @ www.dataanalytics.org.uk
 \examples{
 The following example takes the standard blue and makes it transparent (~50\%):
 
-mycol <- rgb(0, 0, 255, max = 255, alpha = 125, names = "blue50")
+mycol <- rgb(0, 0, 255, alpha = 125, names = "blue50")
 
 mycol
 
@@ -61,26 +61,15 @@ mycol
 ## The function is currently defined as
 function (x)
 {
-t_col <- function(color, percent = 50, name = NULL) {
-    #      color = color name
-    #    percent = % transparency
-    #       name = an optional name for the color
-
-    ## Get RGB values for named color
+t_col <- function (color, percent = 50, name = NULL)
+{
     rgb.val <- col2rgb(color)
-
-    ## Make new color using input color as base and alpha set by transparency
-    t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
-                 max = 255,
-                 alpha = (100 - percent) * 255 / 100,
-                 names = name)
-
-    ## Save the color
+    t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3], maxColorValue = 255,
+        alpha = (100 - percent) * 255/100, names = name)
     invisible(t.col)
 }
-## END
-  }
 }
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
 % \keyword{ ~kwd1 }
