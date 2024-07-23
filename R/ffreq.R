@@ -34,34 +34,33 @@
 #' @export
 
 ffreq <- function(data, vars, group_vars = NULL, na.rm = F) {
-    # Helper function to calculate frequencies for a single column
+
     calculate_frequencies_for_column <- function(data, column, group_vars, na.rm) {
         if (!is.null(group_vars)) {
             if (na.rm) {
-                data <- data %>% filter(across(all_of(group_vars), ~ !is.na(.)))
+                data <- data %>% filter(across(all_of(group_vars), ~!is.na(.)))
             }
             data %>%
                 group_by(across(all_of(group_vars))) %>%
                 count(!!sym(column)) %>%
                 mutate(freq_by_group = round(n * 100 / sum(n), 2)) %>%
                 ungroup() %>%
-                mutate(freq_abs = round(n * 100 / sum(n), 2))
+                mutate(freq_abs = round(n * 100 / sum(n), 2)) %>%
+                rename(value = !!sym(column))
         } else {
             data %>%
                 count(!!sym(column)) %>%
-                mutate(freq_abs = round(n * 100 / sum(n), 2))
+                mutate(freq_abs = round(n * 100 / sum(n), 2)) %>%
+                rename(value = !!sym(column))
         }
     }
 
-    # Apply the helper function to each column and combine results
     result <- lapply(vars, function(col) {
         freqs <- calculate_frequencies_for_column(data, col, group_vars, na.rm)
-        freqs %>%
-            mutate(Variable = col)
+        freqs %>% mutate(Variable = col) %>% select(Variable, value, everything())
     })
 
     combined_result <- bind_rows(result)
-
     return(combined_result)
 }
 
