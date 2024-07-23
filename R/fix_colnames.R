@@ -20,6 +20,7 @@ fix_colnames <- function(df) {
     names(df) <- sapply(names(df), function(x) {
         x <- stringr::str_trim(x) %>%
             stringr::str_replace_all("[:punct:]", "_") %>%
+            stringr::str_replace_all("\\s", "_") %>%
             tolower() %>%
             rm_accent()
     }
