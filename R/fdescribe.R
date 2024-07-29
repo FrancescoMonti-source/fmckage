@@ -5,6 +5,8 @@
 #' @param data A data frame containing the data.
 #' @param vars A character vector of variable names for which to compute summary statistics.
 #' @param group_vars A character vector of variable names to group by (optional).
+#' @param names_sep A character string according to which split the variables' names
+#'
 #'
 #' @return A data frame with descriptive statistics. If `group_vars` is provided, the output is grouped by these variables. The resulting data frame has statistics as columns and the specified variables as rows.
 #'
@@ -28,70 +30,62 @@
 #' @import tidyr
 #' @import stringr
 #' @export
-fdescribe <- function(data, vars, group_vars = NULL) {
-    # Summarize data with or without grouping
+#'
+fdescribe <- function(data, vars, group_vars = NULL, names_sep = "_") {
     summary_data <- if (!is.null(group_vars)) {
-        data %>%
-            group_by(across(all_of(group_vars))) %>%
-            summarise(
-                n = n(),
-                across(all_of(vars), list(
+        data %>% group_by(across(all_of(group_vars))) %>% summarise(
+            n = n(),
+            across(
+                all_of(vars),
+                list(
                     mean = ~mean(.x, na.rm = TRUE),
                     sd = ~sd(.x, na.rm = TRUE),
                     min = ~min(.x, na.rm = TRUE),
                     max = ~max(.x, na.rm = TRUE),
                     range = ~max(.x, na.rm = TRUE) - min(.x, na.rm = TRUE),
                     se = ~sd(.x, na.rm = TRUE) / sqrt(n())
-                ))
-            ) %>%
-            mutate(across(where(is.numeric), ~round(.x, 2)))
+                )
+            )
+        ) %>% mutate(across(where(is.numeric), ~round(.x, 2)))
     } else {
-        data %>%
-            summarise(
-                n = n(),
-                across(all_of(vars), list(
+        data %>% summarise(
+            n = n(),
+            across(
+                all_of(vars),
+                list(
                     mean = ~mean(.x, na.rm = TRUE),
                     sd = ~sd(.x, na.rm = TRUE),
                     min = ~min(.x, na.rm = TRUE),
                     max = ~max(.x, na.rm = TRUE),
                     range = ~max(.x, na.rm = TRUE) - min(.x, na.rm = TRUE),
                     se = ~sd(.x, na.rm = TRUE) / sqrt(n())
-                ))
-            ) %>%
-            mutate(across(where(is.numeric), ~round(.x, 2)))
+                )
+            )
+        ) %>% mutate(across(where(is.numeric), ~round(.x, 2)))
     }
 
-    # Pivot longer to have statistics as one column
-    df_long <- summary_data %>%
-        pivot_longer(
-            cols = matches(paste(vars, collapse = "|")),
-            names_to = c("Variable", "Statistic"),
-            names_sep = "_",
-            values_to = "Value"
-        )
+    df_long <- summary_data %>% pivot_longer(
+        cols = matches(paste(vars, collapse = "|")),
+        names_to = c("Variable", "Statistic"),
+        names_sep = names_sep,
+        values_to = "Value"
+    )
 
-    # Pivot wider to have statistics as columns and vars as rows
     if (!is.null(group_vars)) {
-        df_wide <- df_long %>%
-            pivot_wider(
-                names_from = "Statistic",
-                values_from = "Value"
-            ) %>%
-            arrange(Variable, across(all_of(group_vars))) %>%
+        df_wide <- df_long %>% pivot_wider(
+            names_from = "Statistic",
+            values_from = "Value"
+        ) %>% arrange(Variable, across(all_of(group_vars))) %>%
             relocate(Variable, .before = all_of(group_vars)) %>%
             mutate(Variable = str_to_title(Variable))
-
         names(df_wide) = str_to_title(names(df_wide))
     } else {
-        df_wide <- df_long %>%
-            pivot_wider(
-                names_from = "Statistic",
-                values_from = "Value"
-            ) %>%
-            arrange(Variable) %>%
+        df_wide <- df_long %>% pivot_wider(
+            names_from = "Statistic",
+            values_from = "Value"
+        ) %>% arrange(Variable) %>%
             relocate(Variable) %>%
             mutate(Variable = str_to_title(Variable))
-
         names(df_wide) = str_to_title(names(df_wide))
     }
 
