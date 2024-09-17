@@ -4,7 +4,7 @@
 \alias{fdescribe}
 \title{fdescribe: Function to compute descriptive statistics}
 \usage{
-fdescribe(data, vars, group_vars = NULL)
+fdescribe(data, vars, group_vars = NULL, names_sep = "_")
 }
 \arguments{
 \item{data}{A data frame containing the data.}
@@ -12,6 +12,8 @@ fdescribe(data, vars, group_vars = NULL)
 \item{vars}{A character vector of variable names for which to compute summary statistics.}
 
 \item{group_vars}{A character vector of variable names to group by (optional).}
+
+\item{names_sep}{A character string according to which split the variables' names}
 }
 \value{
 A data frame with descriptive statistics. If `group_vars` is provided, the output is grouped by these variables. The resulting data frame has statistics as columns and the specified variables as rows.
