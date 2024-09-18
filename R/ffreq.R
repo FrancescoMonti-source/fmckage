@@ -57,7 +57,7 @@ ffreq <- function(data, vars, group_vars = NULL, na.rm = F) {
 
     result <- lapply(vars, function(col) {
         freqs <- calculate_frequencies_for_column(data, col, group_vars, na.rm)
-        freqs %>% mutate(Variable = col) %>% select(Variable, value, everything())
+        freqs %>% mutate(Variable = col) %>% select(value, everything())
     })
 
     combined_result <- bind_rows(result)
