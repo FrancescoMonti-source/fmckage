@@ -4,12 +4,12 @@
 \alias{export_package_functions}
 \title{Export Functions from a Package}
 \usage{
-export_package_functions(package_name, output_file_path)
+export_package_functions(package_name, path)
 }
 \arguments{
 \item{package_name}{A string specifying the name of the package from which to export functions.}
 
-\item{output_file_path}{A string specifying the path and name of the output file where the functions will be written.}
+\item{path}{A string specifying the path and name of the output file where the functions will be written.}
 }
 \value{
 Invisible. The function writes to a file and does not return a value.

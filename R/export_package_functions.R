@@ -4,7 +4,7 @@
 #' Each function is extracted and written to the file with its name, making it easy to source in another environment.
 #'
 #' @param package_name A string specifying the name of the package from which to export functions.
-#' @param output_file_path A string specifying the path and name of the output file where the functions will be written.
+#' @param path A string specifying the path and name of the output file where the functions will be written.
 #'
 #' @return Invisible. The function writes to a file and does not return a value.
 #'
@@ -17,7 +17,7 @@
 #' @export
 #'
 
-export_package_functions <- function(package_name, output_file_path) {
+export_package_functions <- function(package_name, path) {
     # Check if the package is available
     if (!require(package_name, character.only = TRUE)) {
         stop("Package not found: ", package_name)
@@ -29,8 +29,8 @@ export_package_functions <- function(package_name, output_file_path) {
     # Filter out the function names
     function_names <- Filter(function(x) is.function(get(x, envir = asNamespace(package_name))), pkg_objects)
 
-    # Open the output file
-    output_file <- file(output_file_path, "w")
+    # Open the output file with UTF-8 encoding
+    output_file <- file(path, "w", encoding = "UTF-8")
 
     # Write each function's source code to the file
     for (fn in function_names) {
@@ -43,5 +43,6 @@ export_package_functions <- function(package_name, output_file_path) {
     # Close the file
     close(output_file)
 
-    cat("Functions exported to: ", output_file_path, "\n")
+    cat("Functions exported to: ", path, "\n")
 }
+
