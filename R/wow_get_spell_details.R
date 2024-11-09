@@ -34,7 +34,7 @@
 #' @import rvest dplyr stringr purrr
 #' @export
 
-get_spell_details <- function(spell_ids) {
+wow_get_spell_details <- function(spell_ids) {
 
     # Inner function to retrieve details for a single spell ID
     get_single_spell_details <- function(spell_id) {
