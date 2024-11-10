@@ -1,4 +1,3 @@
-# Load necessary libraries
 library(rvest)
 library(dplyr)
 library(purrr)
@@ -21,10 +20,10 @@ library(purrr)
 #' @examples
 #' \dontrun{
 #' # Retrieve location for a single NPC
-#' wowhead_get_unit_location(214840)
+#' wowhead_get_unit_location(135263)
 #'
 #' # Retrieve locations for multiple NPCs
-#' npc_ids <- c(214840, 214841, 214842)  # Replace with actual NPC IDs
+#' npc_ids <- c(214840, 135263, 214842)  # Replace with actual NPC IDs
 #' npc_locations <- wowhead_get_unit_location(npc_ids)
 #' print(npc_locations)
 #' }
@@ -47,11 +46,20 @@ wowhead_get_unit_location <- function(npc_ids) {
             return(NA)
         }
 
-        # Extract the location(s) from the span with id="locations"
+        # Attempt to extract locations from the primary method (span with id="locations")
         locations <- page %>%
             html_node("#locations") %>%
             html_nodes("a") %>%  # Select all <a> tags within the locations span
-            html_text(trim = TRUE)  # Get the text of each <a> tag
+            html_text(trim = TRUE)
+
+        # If the primary method fails, try an alternative method by looking for links with "/zone="
+        if (length(locations) == 0) {
+            locations <- page %>%
+                html_nodes("a") %>%
+                # Filter links containing "/zone="
+                html_nodes(xpath = '//a[contains(@href, "/zone=")]') %>%
+                html_text(trim = TRUE)
+        }
 
         # If no locations are found, return NA
         if (length(locations) == 0) {
