@@ -57,5 +57,6 @@ generate_cast_timeline <- function(data, max_time = 300) {
             cast_times = list(process_cast_times(combattimer, duration, progressive, max_time))
         ) %>%
         unnest_longer(cast_times) %>%  # Expand cast times into rows
-        ungroup()  # Remove rowwise grouping
+        ungroup() %>%  # Remove rowwise grouping
+        mutate(timer = paste("Timer:", cast_times))
 }
