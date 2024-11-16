@@ -58,5 +58,6 @@ generate_cast_timeline <- function(data, max_time = 300) {
         ) %>%
         unnest_longer(cast_times) %>%  # Expand cast times into rows
         ungroup() %>%  # Remove rowwise grouping
-        mutate(timer = paste("Timer:", cast_times))
+        mutate(timer = paste("Timer:", cast_times)) %>%
+        select(location,unit,boss_bin,spell,cast_times,timer)
 }
