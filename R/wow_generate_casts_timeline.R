@@ -9,13 +9,12 @@
 #' @examples
 #' # Example usage:
 #' timeline <- generate_cast_timeline(data)
-generate_cast_timeline <- function(data, max_time = 300) {
+generate_casts_timeline <- function(data, max_time = 240) {
     # Validate input data
     if (!all(c("combattimer", "duration", "progressive") %in% colnames(data))) {
         stop("The dataframe must contain 'combattimer', 'duration', and 'progressive' columns.")
     }
 
-    # Nested function to process each row's cast times
     process_cast_times <- function(combattimer, duration, progressive, max_time) {
         # Return an empty vector if combattimer or duration is NA
         if (is.na(combattimer) || is.na(duration) || is.na(max_time)) return(numeric(0))
@@ -49,7 +48,7 @@ generate_cast_timeline <- function(data, max_time = 300) {
         }
     }
 
-    # Process data
+
     data %>%
         filter(!is.na(combattimer) & !is.na(duration)) %>%  # Remove rows with invalid values
         rowwise() %>%
@@ -59,5 +58,5 @@ generate_cast_timeline <- function(data, max_time = 300) {
         unnest_longer(cast_times) %>%  # Expand cast times into rows
         ungroup() %>%  # Remove rowwise grouping
         mutate(timer = paste("Timer:", cast_times)) %>%
-        select(location,unit,boss_bin,spell,cast_times,timer)
+        select(any_of(c("location","unit","boss_bin","spell","cast_times","timer")))
 }
