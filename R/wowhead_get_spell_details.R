@@ -50,7 +50,7 @@ wowhead_get_spell_details <- function(spell_ids) {
                 spell_id = spell_id,
                 name = NA,
                 duration = NA, cooldown = NA, range = NA, cast_time = NA,
-                school = NA, effects = NA, flags = NA, stringsAsFactors = FALSE
+                school = NA, effects = NA, flags = NA, tooltip = NA, stringsAsFactors = FALSE
             ))
         }
 
@@ -111,6 +111,11 @@ wowhead_get_spell_details <- function(spell_ids) {
             str_trim() %>%
             paste(collapse = "; ")
 
+        # Extract Tooltip
+        tooltip <- page %>%
+            html_node("div.q") %>%
+            html_text(trim = TRUE)
+
         # Create a data frame for the current spell
         data.frame(
             spell_id = spell_id,
@@ -122,6 +127,7 @@ wowhead_get_spell_details <- function(spell_ids) {
             school = ifelse(length(school) == 0, NA, school),
             effects = ifelse(length(effects) == 0, NA, effects),
             flags = ifelse(length(flags) == 0, NA, flags),
+            tooltip = ifelse(length(tooltip) == 0, NA, tooltip),
             stringsAsFactors = FALSE
         )
     }
@@ -129,3 +135,4 @@ wowhead_get_spell_details <- function(spell_ids) {
     # Apply the inner function to each spell_id in spell_ids and combine results
     map_dfr(spell_ids, get_single_spell_details)
 }
+
