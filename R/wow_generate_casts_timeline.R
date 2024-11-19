@@ -9,7 +9,7 @@
 #' @examples
 #' # Example usage:
 #' timeline <- generate_cast_timeline(data)
-generate_casts_timeline <- function(data, max_time = 240) {
+wow_generate_casts_timeline <- function(data, max_time = 240) {
     # Validate input data
     if (!all(c("combattimer", "duration", "progressive") %in% colnames(data))) {
         stop("The dataframe must contain 'combattimer', 'duration', and 'progressive' columns.")
@@ -58,5 +58,5 @@ generate_casts_timeline <- function(data, max_time = 240) {
         unnest_longer(cast_times) %>%  # Expand cast times into rows
         ungroup() %>%  # Remove rowwise grouping
         mutate(timer = paste("Timer:", cast_times)) %>%
-        select(any_of(c("location","unit","boss_bin","spell","cast_times","timer")))
+        select(any_of(c("location","unit","isboss","spell","cast_times","timer","tooltip","duration","combattimer")))
 }
