@@ -58,5 +58,5 @@ wow_generate_casts_timeline <- function(data, max_time = 240) {
         unnest_longer(cast_times) %>%  # Expand cast times into rows
         ungroup() %>%  # Remove rowwise grouping
         mutate(timer = paste("Timer:", cast_times)) %>%
-        select(any_of(c("location","unit","isboss","spell","cast_times","timer","tooltip","duration","combattimer")))
+        select(any_of(c("location","unit","isboss","spell","cast_times","timer","tooltip","duration","combattimer","progressive")))
 }
