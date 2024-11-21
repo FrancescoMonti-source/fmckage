@@ -17,7 +17,7 @@ wow_generate_casts_timeline <- function(data, max_time = 240) {
 
     process_cast_times <- function(combattimer, duration, progressive, max_time) {
         # Return an empty vector if combattimer or duration is NA
-        if (is.na(combattimer) || is.na(duration) || is.na(max_time)) return(numeric(0))
+        if (is.na(combattimer)) return(numeric(0))
 
         start_time <- as.numeric(combattimer)
         duration <- as.numeric(duration)
