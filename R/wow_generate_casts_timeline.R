@@ -23,7 +23,7 @@ wow_generate_casts_timeline <- function(data, max_time = 240) {
         duration <- as.numeric(duration)
         max_time <- as.numeric(max_time)
 
-        if (progressive == "0") {
+        if (progressive == "0" | is.na(progressive)) {
             # Fixed interval casts
             return(seq(start_time, max_time, by = duration))
         } else {
@@ -50,7 +50,7 @@ wow_generate_casts_timeline <- function(data, max_time = 240) {
 
 
     data %>%
-        filter(!is.na(combattimer) & !is.na(duration)) %>%  # Remove rows with invalid values
+        filter(!is.na(combattimer) & (!is.na(duration) | !is.na(progressive))) %>%  # Remove rows with invalid values
         rowwise() %>%
         mutate(
             cast_times = list(process_cast_times(combattimer, duration, progressive, max_time))
