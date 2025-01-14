@@ -19,3 +19,4 @@ process_actes <- function(data) {
         ) %>%
         distinct()
 }
+PRESLABEL	UCD13	MEDTYPE	SPELABEL	VOIE	PRESDTDEB	PRESDTFIN	PRESDUR	CAREPLAN
