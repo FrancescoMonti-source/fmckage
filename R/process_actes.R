@@ -10,7 +10,7 @@
 #' actes_data <- process_actes(data)
 process_actes <- function(data) {
     data %>%
-        select(ends_with("(?i)id"), PATBD, PATAGE, PATSEX, DATENT, DATSORT, SEJDUR, SEJUM, SEJUF, contains("ACTE")) %>%
+        select(PATID,EVTID,ELTID, PATBD, PATAGE, PATSEX, DATENT, DATSORT, SEJDUR, SEJUM, SEJUF, contains("ACTE"), contains("UFPRO"), contains("UFDEM")) %>%
         pivot_longer(
             cols = c(contains("CODEACTE"), contains("DATEACTE"), contains("UFPRO"), contains("UFDEM"), contains("NOMENCLATURE")),
             names_to = c(".value"),
