@@ -14,9 +14,9 @@ process_actes <- function(data) {
         pivot_longer(
             cols = c(contains("CODEACTE"), contains("DATEACTE"), contains("UFPRO"), contains("UFDEM"), contains("NOMENCLATURE")),
             names_to = c(".value"),
-            names_pattern = "(CODEACTE|DATEACTE|UFPRO|UFDEM|NOMENCLATURE).+",
+            names_pattern = "(CODEACTE|DATEACTE|UFPRO|UFDEM|NOMENCLATURE).*",
             values_drop_na = TRUE
         ) %>%
         distinct()
 }
-PRESLABEL	UCD13	MEDTYPE	SPELABEL	VOIE	PRESDTDEB	PRESDTFIN	PRESDUR	CAREPLAN
+

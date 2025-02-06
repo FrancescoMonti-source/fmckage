@@ -44,7 +44,7 @@ process_bio <- function(data, drop_cols = c("CSTE_LABO")) {
         pivot_longer(
             cols = c(contains("TYPEANA"), contains("NUMRES"), contains("STRRES"), contains("LOINC"), contains("CR"), contains("CMT")),
             names_to = c(".value"),
-            names_pattern = "(TYPEANA|NUMRES|STRRES|LOINC|CR|CMT).+",
+            names_pattern = "(TYPEANA|NUMRES|STRRES|LOINC|CR|CMT).*",
             values_drop_na = TRUE
         ) %>%
         distinct()
