@@ -6,6 +6,15 @@
 #' @param tcorpus A `tCorpus` object created with `create_tcorpus()`.
 #' @param query_list A named list of query strings. Each name will become a column in the output.
 #' @param meta_vars Character vector of metadata variables used to group match results. Defaults to `c("PATID", "EVTID")`.
+#' You can also include the following optional metadata fields:
+#' \
+#' - `RECDATE`: Date of the clinical record (e.g., note timestamp)
+#' - `RECTYPE`: Type of clinical record (e.g., discharge summary, radiology report)
+#' - `SEJUM`: Medical unit of the hospital stay
+#' - `SEJUF`: Medical service of the hospital stay (each UM is composed by multiple UFs)
+#' - `PATBD`: Patient birth date
+#' - `PATAGE`: Patient age at time of encounter
+#' - `PATSEX`: Patient sex (e.g., M/F)
 #'
 #' @return A wide-format data frame where each row is a unique combination of `meta_vars`, and each column corresponds to a query in `query_list`, with binary values (1 = match, 0 = no match).
 #'
@@ -16,7 +25,7 @@
 #' query_match_binary_df(tc, qlist)
 #'
 #' @export
-query_match_binary_df() <- function(tcorpus, query_list, meta_vars = c("PATID", "EVTID")) {
+query_match_binary_df_tcorpus() <- function(tcorpus, query_list, meta_vars = c("PATID", "EVTID")) {
 
     # Check for required packages
     required_packages <- c("corpustools", "dplyr", "tidyr", "purrr")
