@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 #' Match multiple queries against EDSaN 'doceds' using d2imr and return binary indicators
 #'
 #' This function queries the EDSaN document database (module 'doceds') via the `d2imr` API,

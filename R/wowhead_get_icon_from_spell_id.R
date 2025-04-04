@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 #' Get the Wowhead icon URL for a given spell ID
 #'
 #' This function scrapes the spell page on Wowhead and extracts the
