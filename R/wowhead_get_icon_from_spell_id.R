@@ -22,12 +22,12 @@ wowhead_get_icon_from_spell_id <- function(spell_id) {
     resp <- tryCatch({
         httr::GET(url, httr::add_headers(`User-Agent` = "Mozilla/5.0"))
     }, error = function(e) {
-        message("❌ Error fetching spell ID ", spell_id, ": ", e$message)
+        message("Error fetching spell ID ", spell_id, ": ", e$message)
         return(NULL)
     })
 
     if (is.null(resp) || httr::http_error(resp)) {
-        message("❌ Failed to fetch spell ID: ", spell_id)
+        message("Failed to fetch spell ID: ", spell_id)
         return(NA)
     }
 
@@ -36,7 +36,7 @@ wowhead_get_icon_from_spell_id <- function(spell_id) {
     icon_line <- stringr::str_extract(html, '"iconFilename":"[^"]+')
 
     if (is.na(icon_line)) {
-        message("⚠️ Icon not found for spell ID: ", spell_id)
+        message("Icon not found for spell ID: ", spell_id)
         return(NA)
     }
 
