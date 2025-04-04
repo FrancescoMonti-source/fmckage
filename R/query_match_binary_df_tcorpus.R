@@ -25,7 +25,7 @@
 #' query_match_binary_df(tc, qlist)
 #'
 #' @export
-query_match_binary_df_tcorpus() <- function(tcorpus, query_list, meta_vars = c("PATID", "EVTID")) {
+query_match_binary_df_tcorpus <- function(tcorpus, query_list, meta_vars = c("PATID", "EVTID")) {
 
     # Check for required packages
     required_packages <- c("corpustools", "dplyr", "tidyr", "purrr")
