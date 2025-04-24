@@ -10,6 +10,6 @@
 #' main_data <- process_main(data)
 process_main <- function(data) {
     data %>%
-        select(ends_with("(?i)id"), DATENT, DATSORT, PATBD, PATAGE, PATSEX, SEJDUR, MODEENT, MODESORT, PMSISTATUT, SEJUM, SEJUF) %>%
+        select(PATID,EVTID,ELTID, DATENT, DATSORT, PATBD, PATAGE, PATSEX, SEJDUR, MODEENT, MODESORT, PMSISTATUT, SEJUM, SEJUF) %>%
         distinct()
 }
