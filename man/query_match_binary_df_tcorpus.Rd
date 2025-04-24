@@ -37,6 +37,6 @@ indicating whether each query matched for each unique combination of metadata va
 df <- data.frame(EVTID = 1:3, text = c("rachitisme", "osteoporose", "healthy"), PATID = c("P1", "P2", "P3"))
 tc <- create_tcorpus(df, doc_col = "EVTID", text_col = "text", meta = c("PATID", "EVTID"))
 qlist <- list(rachitisme = "rachitisme", osteoporose = "osteoporo*")
-query_match_binary_df(tc, qlist)
+query_match_binary_df_tcorpus(tc, qlist)
 
 }
