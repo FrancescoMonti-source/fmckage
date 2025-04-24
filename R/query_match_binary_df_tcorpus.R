@@ -22,7 +22,7 @@
 #' df <- data.frame(EVTID = 1:3, text = c("rachitisme", "osteoporose", "healthy"), PATID = c("P1", "P2", "P3"))
 #' tc <- create_tcorpus(df, doc_col = "EVTID", text_col = "text", meta = c("PATID", "EVTID"))
 #' qlist <- list(rachitisme = "rachitisme", osteoporose = "osteoporo*")
-#' query_match_binary_df(tc, qlist)
+#' query_match_binary_df_tcorpus(tc, qlist)
 #'
 #' @export
 query_match_binary_df_tcorpus <- function(tcorpus, query_list, meta_vars = c("PATID", "EVTID")) {
@@ -40,7 +40,7 @@ query_match_binary_df_tcorpus <- function(tcorpus, query_list, meta_vars = c("PA
     }
 
     # Check if required metadata columns exist
-    missing_meta <- setdiff(group_vars, colnames(tcorpus$meta))
+    missing_meta <- setdiff(meta_vars, colnames(tcorpus$meta))
     if (length(missing_meta) > 0) {
         stop(paste("Missing metadata columns in tCorpus:", paste(missing_meta, collapse = ", ")))
     }
@@ -52,7 +52,7 @@ query_match_binary_df_tcorpus <- function(tcorpus, query_list, meta_vars = c("PA
         if (nrow(subcorpus$meta) == 0) return(NULL)
 
         subcorpus$meta %>%
-            dplyr::distinct(across(all_of(group_vars))) %>%
+            dplyr::distinct(across(all_of(meta_vars))) %>%
             dplyr::mutate(CONDITION = condition)
     })
 
