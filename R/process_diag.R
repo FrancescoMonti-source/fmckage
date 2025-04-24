@@ -8,16 +8,13 @@
 #' @examples
 #' data <- data.frame()  # Example data
 #' diag_data <- process_diag(data)
-process_diag <- function(data) {
+process_diag  <- function (data)
+{
     data %>%
-        select(ends_with("(?i)id"), PATAGE, PATSEX, DALL) %>%
+        select(ends_with("ID"), DALL) %>%
         distinct() %>%
-        unnest(DALL) %>%
         separate_rows(DALL, sep = " ") %>%
-        filter(DALL != "") %>%
-        mutate(
-            diag = str_extract(DALL, ":(.+)", group = 1),
-            type_diag = str_sub(DALL, 1, 2)
-        ) %>%
+        filter(str_detect(DALL,"\\d")) %>%
+        mutate(diag = str_extract(DALL, ":(.+)", group = 1), type_diag = str_sub(DALL, 1, 2)) %>%
         select(-DALL)
 }
