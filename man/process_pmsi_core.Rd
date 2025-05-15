@@ -2,22 +2,31 @@
 % Please edit documentation in R/process_pmsi_core.R
 \name{process_pmsi_core}
 \alias{process_pmsi_core}
-\title{Core PMSI Data Processing Function}
+\title{Process PMSI Raw Data into a Flat Data Frame}
 \usage{
-process_pmsi_core(data, filter_cols = c("GHM", "SRC", "SEVERITE"))
+process_pmsi_core(data)
 }
 \arguments{
-\item{data}{A list or dataframe containing PMSI data.}
-
-\item{filter_cols}{A character vector of columns to exclude during processing. Defaults to c("GHM", "SRC", "SEVERITE").}
+\item{data}{A list where each element represents a patient record (as a list of variables).
+The elements may be nested, and may contain atomic vectors or short lists.}
 }
 \value{
-A cleaned dataframe after removing filtered columns and unlisting the data.
+A tibble where each row corresponds to a patient and each column represents
+        a flattened field. All values are character vectors; fields containing multiple
+        values are collapsed into a `;`-separated string.
 }
 \description{
-This function applies core data cleaning and processing logic to PMSI data.
+This function takes a list of nested patient data objects (e.g., parsed from PMSI data),
+flattens each patient record into a single-row data frame, and combines all patients
+into a single tibble. It ensures consistent column types and prevents data loss due
+to inconsistent structures by coercing all fields to character.
 }
 \examples{
-data <- list()  # Example data
-clean_data <- process_pmsi_core(data)
+raw_data <- list(
+  list(PATID = "123", GHM = "04M07", DIAG = c("A123", "B456")),
+  list(PATID = "456", GHM = "05K04", SEVERITE = 2)
+)
+processed <- process_pmsi_core(raw_data)
+print(processed)
+
 }
