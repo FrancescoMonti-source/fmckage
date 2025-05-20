@@ -9,8 +9,13 @@
 #' data <- data.frame()  # Example data
 #' main_data <- process_main(data)
 process_main <- function(data) {
+    cols <- c(
+        "PATID", "EVTID", "ELTID", "DATENT", "DATSORT", "PATBD", "PATAGE", "PATSEX",
+        "SEJDUR", "MODEENT", "MODESORT", "PMSISTATUT", "SEJUM", "SEJUF",
+        "GHM", "SEVERITE", "SRC"
+    )
+
     data %>%
-        select(PATID,EVTID,ELTID, DATENT, DATSORT, PATBD, PATAGE, PATSEX, SEJDUR,
-               MODEENT, MODESORT, PMSISTATUT, SEJUM, SEJUF, GHM, SEVERITE, SRC) %>%
+        select(any_of(cols)) %>%
         distinct()
 }
