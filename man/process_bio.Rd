@@ -2,41 +2,17 @@
 % Please edit documentation in R/process_bio.R
 \name{process_bio}
 \alias{process_bio}
-\title{Process Bio Data}
+\title{Process Bio Data (Fast Version with Package Check)}
 \usage{
-process_bio(data, drop_cols = c("CSTE_LABO"))
+process_bio(data)
 }
 \arguments{
-\item{data}{A list or data frame containing bio data to be processed. Each entry is expected to be a named list.}
-
-\item{drop_cols}{A character vector of column names to be removed during the cleaning process. Default is c("CSTE_LABO").}
+\item{data}{A named list where each element is a list containing metadata and a RESULTATS dataframe.}
 }
 \value{
-A data frame where bio-related data is reshaped into long format, with distinct rows of results.
-The columns selected include "PATID", "EVTID", "ELTID", "PATBD", "PATAGE", "PATSEX", "DATEXAM", "SEJUM",
-"SEJUF", and those containing the string "RESULT". Additionally, columns with the strings "TYPEANA",
-"NUMRES", "STRRES", "LOINC", "CR", and "CMT" are reshaped into long format.
+A long-format data.frame with one row per lab result, including patient/test metadata.
 }
 \description{
-This function processes bio data by first cleaning the dataset by unlisting and removing specified columns.
-It then reshapes the data by selecting relevant columns, including bio-specific variables such as "PATID",
-"EVTID", "ELTID", and results-related information. The function uses "pivot_longer" to convert wide-format
-columns into long-format based on the presence of specific bio-related terms and returns a distinct set of results.
-}
-\details{
-The function performs the following steps:
-1. Unlists all elements in the data and removes columns specified in `drop_cols`.
-2. Selects specific columns for bio data analysis.
-3. Reshapes certain columns (based on "TYPEANA", "NUMRES", "STRRES", "LOINC", "CR", "CMT") into a long format.
-4. Returns distinct rows to remove duplicates.
-}
-\examples{
-# Example usage:
-bio_data <- list(
-    list(PATID = 1, EVTID = 101, ELTID = 1001, PATAGE = 45, PATSEX = "M", DATEXAM = "2024-01-01", RESULT1 = "Normal"),
-    list(PATID = 2, EVTID = 102, ELTID = 1002, PATAGE = 50, PATSEX = "F", DATEXAM = "2024-01-02", RESULT1 = "High")
-)
-result <- process_bio(bio_data)
-print(result)
-
+Efficiently flattens a nested list of bio lab data where each element is named by biol_ID
+and contains patient metadata and a nested RESULTATS dataframe. Uses data.table for performance.
 }
