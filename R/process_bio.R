@@ -52,7 +52,18 @@ process_bio <- function(data) {
             stringsAsFactors = FALSE
         )
 
-        all_results[[i]] <- cbind(meta[rep(1, n), ], results)
+        # Coerce relevant columns after cbind
+        combined <- cbind(meta[rep(1, n), ], results)
+
+        # Ensure TYPEANA is character and NUMRES is numeric (if they exist)
+        if ("TYPEANA" %in% names(combined)) {
+            combined$TYPEANA <- as.character(combined$TYPEANA)
+        }
+        if ("NUMRES" %in% names(combined)) {
+            combined$NUMRES <- as.numeric(combined$NUMRES)
+        }
+
+        all_results[[i]] <- combined
     }
 
     data.table::rbindlist(all_results, fill = TRUE)
