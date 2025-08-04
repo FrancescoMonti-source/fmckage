@@ -8,6 +8,7 @@
 #' @param filename A character string specifying the name of the PowerPoint file to be created (without the .pptx extension).
 #' @param path A character string specifying the directory where the PowerPoint file should be saved.
 #' Defaults is create a new directory called "graphs" under the current working directory which is in accordance with the ProjectTemplate folders arborescence.
+#' @param extension Currently the only working extension is .pptx
 #'
 #' @return A PowerPoint file containing the ggplot2 plot as an editable graphic is saved to the specified directory.
 #'
@@ -21,7 +22,7 @@
 #'
 #' @export
 
-save_editable_plot <- function(plot, filename, path = "../graphs/") {
+save_editable_plot <- function(plot, filename, path = "../graphs/", extension = ".pptx") {
 
     # List of necessary packages
     necessary_packages <- c("ggplot2", "officer", "rvg")
@@ -35,7 +36,7 @@ save_editable_plot <- function(plot, filename, path = "../graphs/") {
             answer <- readline(prompt = "Enter y or n: ")
 
             # If user input is "y", install the package
-            if (answer == "y") {
+            if (answer %in% c("y","Y")) {
                 install.packages(pkg)
                 library(pkg, character.only = TRUE)
             }
@@ -51,5 +52,5 @@ save_editable_plot <- function(plot, filename, path = "../graphs/") {
         ph_with(value = dml(code = print(plot)), location = ph_location_type(type = "body"))
 
     # Save the PowerPoint document
-    print(doc, target = paste0(path, "/", filename, ".pptx"))
+    print(doc, target = paste0(path, "/", filename, extension))
 }
