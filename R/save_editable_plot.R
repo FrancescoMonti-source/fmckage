@@ -10,6 +10,10 @@
 #' Defaults is create a new directory called "graphs" under the current working directory which is in accordance with the ProjectTemplate folders arborescence.
 #' @param extension Currently the only working extension is .pptx
 #'
+#' Add outside of a markdown chunk to allow download:
+#' download [📥 Télécharger le graphique (PPTX)](graphs/boxplot_alat_score_fibrose.pptx)
+#'
+#'
 #' @return A PowerPoint file containing the ggplot2 plot as an editable graphic is saved to the specified directory.
 #'
 #' @examples
@@ -19,7 +23,7 @@
 #'   theme_minimal()
 #' save_editable_plot(p, filename = "my_plot", path = "your_project_name/graphs")
 #' }
-#'
+#' [📥 Télécharger le graphique (PPTX)](graphs/boxplot_alat_score_fibrose.pptx)
 #' @export
 
 save_editable_plot <- function(plot, filename, path = "../graphs/", extension = ".pptx") {
