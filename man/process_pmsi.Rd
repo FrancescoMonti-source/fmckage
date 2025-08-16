@@ -13,7 +13,7 @@ process_pmsi(data)
 Three dataframes: main PMSI data, actes data, and diagnosis data. The dfs are named "x", "x_doag" and "x_actes".
 }
 \description{
-This function serves as a wrapper to process PMSI data by calling the `process_actes`, `process_diag`, and `process_main` functions.
+This function serves as a wrapper to process PMSI data by calling the \code{process_actes}, \code{process_diag}, and \code{process_main} functions.
 }
 \examples{
 data <- data.frame()  # Example data

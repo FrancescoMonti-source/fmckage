@@ -64,8 +64,8 @@ query_match_binary_df_pmsi(
 A data frame with (PATID, EVTID) and binary columns for each query. Absence of a match is left encoded as NA.
 }
 \description{
-This function queries the EDSaN document database (module 'doceds') via the `d2imr` API,
-applying multiple keyword searches defined in `query_list`. It returns a wide-format data frame
+This function queries the EDSaN document database (module 'doceds') via the \code{d2imr} API,
+applying multiple keyword searches defined in \code{query_list}. It returns a wide-format data frame
 with one row per unique (PATID, EVTID) combination and one binary column per query, indicating
 whether a match was found.
 }

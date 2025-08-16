@@ -16,7 +16,7 @@ ffreq(data, vars, group_vars = NULL, na.rm = F)
 \item{na.rm}{A logical value indicating whether to remove NA values in the grouping variable(s). Default is TRUE.}
 }
 \value{
-A data frame with frequency counts and percentages. If `group_vars` is provided, the output is grouped by these variables. The resulting data frame has columns for each variable, their counts, frequencies by group, and absolute frequencies.
+A data frame with frequency counts and percentages. If \code{group_vars} is provided, the output is grouped by these variables. The resulting data frame has columns for each variable, their counts, frequencies by group, and absolute frequencies.
 }
 \description{
 This function calculates the frequency counts and percentages for specified columns in a data frame, optionally grouped by one or more grouping variables.

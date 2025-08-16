@@ -12,8 +12,8 @@ The elements may be nested, and may contain atomic vectors or short lists.}
 }
 \value{
 A tibble where each row corresponds to a patient and each column represents
-        a flattened field. All values are character vectors; fields containing multiple
-        values are collapsed into a `;`-separated string.
+a flattened field. All values are character vectors; fields containing multiple
+values are collapsed into a \verb{;}-separated string.
 }
 \description{
 This function takes a list of nested patient data objects (e.g., parsed from PMSI data),

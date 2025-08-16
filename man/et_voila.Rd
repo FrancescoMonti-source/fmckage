@@ -15,13 +15,13 @@ et_voila(n, min_val, max_val, target_value, agg_func = mean)
 
 \item{target_value}{Numeric. The target value for the aggregate statistic.}
 
-\item{agg_func}{Function. The aggregate function to use (e.g., `mean`, `median`). Default is `mean`.}
+\item{agg_func}{Function. The aggregate function to use (e.g., \code{mean}, \code{median}). Default is \code{mean}.}
 }
 \value{
-A numeric vector of length `n` that approximates the target aggregate statistic.
+A numeric vector of length \code{n} that approximates the target aggregate statistic.
 }
 \description{
-This function generates a sample of `n` numbers within a given range `[min_val, max_val]`
+This function generates a sample of \code{n} numbers within a given range \verb{[min_val, max_val]}
 such that a specified aggregate statistic (e.g., mean, median) is approximately equal to a target value.
 }
 \examples{

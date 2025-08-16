@@ -10,10 +10,10 @@ na_only_cols(df)
 \item{df}{A data frame or tibble.}
 }
 \value{
-A character vector containing the names of the columns where all values are `NA`.
+A character vector containing the names of the columns where all values are \code{NA}.
 }
 \description{
-This function returns the names of the columns in a data frame or tibble that contain only `NA` values.
+This function returns the names of the columns in a data frame or tibble that contain only \code{NA} values.
 }
 \examples{
 df <- data.frame(a = c(1, 2, 3),

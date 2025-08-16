@@ -1,7 +1,7 @@
 #' Align Multiple Vectors by Matching Values
 #'
-#' \code{align_vectors} takes multiple vectors as input and aligns them by unique values,
-#' creating a data frame with matched rows across all vectors and filling unmatched positions with \code{NA}.
+#' `align_vectors` takes multiple vectors as input and aligns them by unique values,
+#' creating a data frame with matched rows across all vectors and filling unmatched positions with `NA`.
 #' This function is useful for comparing multiple sets of elements and aligning them based on common values.
 #'
 #' @param ... Vectors to be aligned. Any number of vectors can be provided, and they do not need to be of the same length.
@@ -9,7 +9,7 @@
 #'
 #' @return A data frame where each row represents a unique element from the union of all input vectors. Columns are named
 #'         after the input vectors. Each column aligns its values to this unique element list, and positions with no match
-#'         are filled with \code{NA}. Rows with all \code{NA} values are removed.
+#'         are filled with `NA`. Rows with all `NA` values are removed.
 #'
 #' @examples
 #' # Example vectors

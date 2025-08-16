@@ -7,12 +7,12 @@
 wow_generate_casts_timeline(data, max_time = 240)
 }
 \arguments{
-\item{data}{A dataframe containing the columns `combattimer`, `duration`, and `progressive`.}
+\item{data}{A dataframe containing the columns \code{combattimer}, \code{duration}, and \code{progressive}.}
 
 \item{max_time}{The maximum time (in seconds) to consider for generating the timeline. Default is 300.}
 }
 \value{
-A dataframe with expanded `cast_times` for each spell event.
+A dataframe with expanded \code{cast_times} for each spell event.
 }
 \description{
 This function processes a dataframe of spell data and generates a timeline of cast events based on

@@ -11,24 +11,24 @@ wowhead_get_spell_details(spell_ids)
 }
 \value{
 A data frame with columns:
-  \describe{
-    \item{spell_id}{The spell ID provided as input.}
-    \item{name}{The name of the spell. If the spell ID does not exist, this will be `NA`.}
-    \item{duration}{The duration of the spell in seconds, if available.}
-    \item{cooldown}{The cooldown of the spell in seconds or minutes, if available.}
-    \item{range}{The range of the spell in yards, if available.}
-    \item{cast_time}{The cast time of the spell (e.g., "Instant" or in seconds), if available.}
-    \item{school}{The school of magic associated with the spell (e.g., Arcane, Fire, etc.), if available.}
-    \item{effects}{A concatenated string listing the effects of the spell, if available.}
-    \item{flags}{A concatenated string listing the flags associated with the spell, if available.}
-  }
-If any information is unavailable, the respective fields will contain `NA`. For non-existent spell IDs, `name` and all other details will be `NA`.
+\describe{
+\item{spell_id}{The spell ID provided as input.}
+\item{name}{The name of the spell. If the spell ID does not exist, this will be \code{NA}.}
+\item{duration}{The duration of the spell in seconds, if available.}
+\item{cooldown}{The cooldown of the spell in seconds or minutes, if available.}
+\item{range}{The range of the spell in yards, if available.}
+\item{cast_time}{The cast time of the spell (e.g., "Instant" or in seconds), if available.}
+\item{school}{The school of magic associated with the spell (e.g., Arcane, Fire, etc.), if available.}
+\item{effects}{A concatenated string listing the effects of the spell, if available.}
+\item{flags}{A concatenated string listing the flags associated with the spell, if available.}
+}
+If any information is unavailable, the respective fields will contain \code{NA}. For non-existent spell IDs, \code{name} and all other details will be \code{NA}.
 }
 \description{
 This function retrieves detailed information for one or multiple World of Warcraft spells from Wowhead, including spell name, duration, cooldown, range, cast time, school, effects, and flags.
 }
 \details{
-This function uses web scraping to retrieve data from Wowhead's spell pages. If a spell ID is invalid or does not exist, the function will set `name` and other details to `NA`. Note that the function may be slow if retrieving information for a large number of spell IDs, and it relies on Wowhead's page structure, which may change over time.
+This function uses web scraping to retrieve data from Wowhead's spell pages. If a spell ID is invalid or does not exist, the function will set \code{name} and other details to \code{NA}. Note that the function may be slow if retrieving information for a large number of spell IDs, and it relies on Wowhead's page structure, which may change over time.
 }
 \examples{
 \dontrun{

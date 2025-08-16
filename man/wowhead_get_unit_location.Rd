@@ -11,17 +11,17 @@ wowhead_get_unit_location(npc_ids)
 }
 \value{
 A data frame with two columns:
-  \describe{
-    \item{npc_id}{The NPC ID provided as input.}
-    \item{location}{The location(s) where the NPC can be found. If multiple locations exist, they are concatenated as a single string separated by "; ". If no location is found, this will be `NA`.}
-  }
-If an NPC ID does not exist or if Wowhead fails to load, `location` will contain `NA`.
+\describe{
+\item{npc_id}{The NPC ID provided as input.}
+\item{location}{The location(s) where the NPC can be found. If multiple locations exist, they are concatenated as a single string separated by "; ". If no location is found, this will be \code{NA}.}
+}
+If an NPC ID does not exist or if Wowhead fails to load, \code{location} will contain \code{NA}.
 }
 \description{
 This function retrieves the in-game locations of multiple World of Warcraft NPCs (mobs) from Wowhead based on their NPC IDs.
 }
 \details{
-This function uses web scraping to retrieve location data from Wowhead’s NPC pages. If an NPC ID is invalid or Wowhead does not provide location information, `location` will be set to `NA`. Note that this function may be slow for a large number of NPC IDs, as it sends a separate request for each ID.
+This function uses web scraping to retrieve location data from Wowhead’s NPC pages. If an NPC ID is invalid or Wowhead does not provide location information, \code{location} will be set to \code{NA}. Note that this function may be slow for a large number of NPC IDs, as it sends a separate request for each ID.
 }
 \examples{
 \dontrun{

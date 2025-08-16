@@ -9,15 +9,15 @@ stay_duration(data, id_col, start_col, end_col, new_col_name = "stay_duration")
 \arguments{
 \item{data}{A dataframe containing the stay data.}
 
-\item{id_col}{The name of the column in `data` that identifies each stay event or patient.}
+\item{id_col}{The name of the column in \code{data} that identifies each stay event or patient.}
 
-\item{start_col}{The name of the column in `data` representing the start date of each stay.}
+\item{start_col}{The name of the column in \code{data} representing the start date of each stay.}
 
-\item{end_col}{The name of the column in `data` representing the end date of each stay.}
+\item{end_col}{The name of the column in \code{data} representing the end date of each stay.}
 }
 \value{
-A dataframe with each unique identifier from `id_col` and the corresponding
-        total duration of stays.
+A dataframe with each unique identifier from \code{id_col} and the corresponding
+total duration of stays.
 }
 \description{
 Computes the total duration of stays (nights spent) in a hospital or similar settings,

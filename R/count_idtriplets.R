@@ -4,7 +4,7 @@
 #' The function is case-insensitive and allows you to specify the columns to count.
 #'
 #' @param data A dataframe containing the data to analyze.
-#' @param cols A character vector of column names to count distinct values from. Default is \code{c("patid", "evtid", "eltid", "doc_id", "pmsi_id")}.
+#' @param cols A character vector of column names to count distinct values from. Default is `c("patid", "evtid", "eltid", "doc_id", "pmsi_id")`.
 #' If not provided, it attempts to find these columns in the data (case-insensitive).
 #' @return This function prints the distinct counts for the specified columns in the dataset.
 #' @export

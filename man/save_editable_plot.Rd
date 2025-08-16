@@ -4,7 +4,7 @@
 \alias{save_editable_plot}
 \title{Save an Editable ggplot2 Plot as a PowerPoint Slide}
 \usage{
-save_editable_plot(plot, filename, path = "../graphs/")
+save_editable_plot(plot, filename, path = "../graphs/", extension = ".pptx")
 }
 \arguments{
 \item{plot}{The ggplot2 plot to be saved.}
@@ -13,6 +13,11 @@ save_editable_plot(plot, filename, path = "../graphs/")
 
 \item{path}{A character string specifying the directory where the PowerPoint file should be saved.
 Defaults is create a new directory called "graphs" under the current working directory which is in accordance with the ProjectTemplate folders arborescence.}
+
+\item{extension}{Currently the only working extension is .pptx
+
+Add outside of a markdown chunk to allow download:
+download \href{graphs/boxplot_alat_score_fibrose.pptx}{📥 Télécharger le graphique (PPTX)}}
 }
 \value{
 A PowerPoint file containing the ggplot2 plot as an editable graphic is saved to the specified directory.
@@ -29,5 +34,5 @@ p <- ggplot(mtcars, aes(mpg, hp)) +
   theme_minimal()
 save_editable_plot(p, filename = "my_plot", path = "your_project_name/graphs")
 }
-
+[📥 Télécharger le graphique (PPTX)](graphs/boxplot_alat_score_fibrose.pptx)
 }

@@ -18,11 +18,13 @@ from a given date.
 }
 \note{
 The function uses the following date ranges to determine seasons:
-- Winter: Dec 21 - Mar 19
-- Spring: Mar 20 - Jun 20
-- Summer: Jun 21 - Sep 21
-- Fall: Sep 22 - Dec 20
+\itemize{
+\item Winter: Dec 21 - Mar 19
+\item Spring: Mar 20 - Jun 20
+\item Summer: Jun 21 - Sep 21
+\item Fall: Sep 22 - Dec 20
 Dates are treated as being in the northern hemisphere.
+}
 }
 \examples{
 getSeason(as.Date("2023-06-15"))

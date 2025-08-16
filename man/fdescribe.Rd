@@ -16,7 +16,7 @@ fdescribe(data, vars, group_vars = NULL, names_sep = "_")
 \item{names_sep}{A character string according to which split the variables' names}
 }
 \value{
-A data frame with descriptive statistics. If `group_vars` is provided, the output is grouped by these variables. The resulting data frame has statistics as columns and the specified variables as rows.
+A data frame with descriptive statistics. If \code{group_vars} is provided, the output is grouped by these variables. The resulting data frame has statistics as columns and the specified variables as rows.
 }
 \description{
 This function computes descriptive statistics (mean, standard deviation, min, max, range, and standard error) for specified variables in a data frame, optionally grouped by one or more grouping variables.

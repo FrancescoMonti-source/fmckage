@@ -13,7 +13,7 @@ fix_colnames(df)
 A dataframe with fixed column names.
 }
 \description{
-This function take a *df* as argument and return a *df* with modified *colnames* to make it easier to work with
+This function take a \emph{df} as argument and return a \emph{df} with modified \emph{colnames} to make it easier to work with
 variable names. Here's what it does: trims whitespace, replaces punctuation with underscores, transforms to lowercase,
 and removes diacritic characters from the column names of the given dataframe.
 }

@@ -11,23 +11,25 @@ query_match_binary_df_tcorpus(
 )
 }
 \arguments{
-\item{tcorpus}{A `tCorpus` object created with `create_tcorpus()`.}
+\item{tcorpus}{A \code{tCorpus} object created with \code{create_tcorpus()}.}
 
 \item{query_list}{A named list of query strings. Each name will become a column in the output.}
 
-\item{meta_vars}{Character vector of metadata variables used to group match results. Defaults to `c("PATID", "EVTID")`.
+\item{meta_vars}{Character vector of metadata variables used to group match results. Defaults to \code{c("PATID", "EVTID")}.
 You can also include the following optional metadata fields:
 \
-- `RECDATE`: Date of the clinical record (e.g., note timestamp)
-- `RECTYPE`: Type of clinical record (e.g., discharge summary, radiology report)
-- `SEJUM`: Medical unit of the hospital stay
-- `SEJUF`: Medical service of the hospital stay (each UM is composed by multiple UFs)
-- `PATBD`: Patient birth date
-- `PATAGE`: Patient age at time of encounter
-- `PATSEX`: Patient sex (e.g., M/F)}
+\itemize{
+\item \code{RECDATE}: Date of the clinical record (e.g., note timestamp)
+\item \code{RECTYPE}: Type of clinical record (e.g., discharge summary, radiology report)
+\item \code{SEJUM}: Medical unit of the hospital stay
+\item \code{SEJUF}: Medical service of the hospital stay (each UM is composed by multiple UFs)
+\item \code{PATBD}: Patient birth date
+\item \code{PATAGE}: Patient age at time of encounter
+\item \code{PATSEX}: Patient sex (e.g., M/F)
+}}
 }
 \value{
-A wide-format data frame where each row is a unique combination of `meta_vars`, and each column corresponds to a query in `query_list`, with binary values (1 = match, 0 = no match).
+A wide-format data frame where each row is a unique combination of \code{meta_vars}, and each column corresponds to a query in \code{query_list}, with binary values (1 = match, 0 = no match).
 }
 \description{
 This function applies a set of keyword queries to a tokenized corpus (tCorpus) and returns a data frame

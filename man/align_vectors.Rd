@@ -12,8 +12,8 @@ The names of the vectors in the argument list will be used as column names in th
 }
 \value{
 A data frame where each row represents a unique element from the union of all input vectors. Columns are named
-        after the input vectors. Each column aligns its values to this unique element list, and positions with no match
-        are filled with \code{NA}. Rows with all \code{NA} values are removed.
+after the input vectors. Each column aligns its values to this unique element list, and positions with no match
+are filled with \code{NA}. Rows with all \code{NA} values are removed.
 }
 \description{
 \code{align_vectors} takes multiple vectors as input and aligns them by unique values,

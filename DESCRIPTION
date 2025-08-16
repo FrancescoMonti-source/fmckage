@@ -15,3 +15,4 @@ Imports:
     rvest,
     tidyverse,
     ggplot2
+Roxygen: list(markdown = TRUE)
