@@ -363,34 +363,56 @@ export_package_functions <- function(package_name, path, only_exported = TRUE) {
 #' @export
 # Long-format function/file map from a pkgnet report (no list-cols)
 # Requires: functions_in_dir(r_dir) -> list(file -> character vector of function names)
-pkg_function_map <- function(pkg_report, r_dir = "R", internal_only = TRUE) {
+# Long-format function/file map from a pkgnet report (flat tables only)
+# Requires: functions_in_dir(r_dir) -> list(file -> character vector of function names)
+pkg_function_map <- function(pkg_report, r_dir = NULL, internal_only = TRUE) {
     fr <- pkg_report$FunctionReporter
 
-    # --- functions defined in your package ---
+    # ---- nodes: functions defined in your package ----
     nodes <- as.data.frame(fr$nodes, stringsAsFactors = FALSE)
     if (!nrow(nodes)) stop("pkgnet FunctionReporter has no nodes; did analysis run?", call. = FALSE)
     name_col <- if ("name" %in% names(nodes)) "name" else if ("node" %in% names(nodes)) "node" else NA_character_
     if (is.na(name_col)) stop("Couldn't find a function-name column in FunctionReporter$nodes.")
     func_names <- as.character(nodes[[name_col]])
 
-    # --- map functions -> files by parsing your R/ dir ---
-    lst <- functions_in_dir(r_dir)  # returns list: file -> char vector of names
+    # ---- choose r_dir (where to parse your .R files) ----
+    if (is.null(r_dir)) {
+        pkg_path <- tryCatch(pkg_report$pkg_path, error = function(e) NULL)
+        if (!is.null(pkg_path) && dir.exists(file.path(pkg_path, "R"))) {
+            r_dir <- file.path(pkg_path, "R")
+        } else {
+            r_dir <- "R"  # fall back to local R/ under current project
+        }
+    }
+
+    # ---- map functions -> files by parsing r_dir ----
+    lst <- functions_in_dir(r_dir)  # list: file -> character vector of names
     fun2file <- if (length(lst)) {
         setNames(rep(names(lst), lengths(lst)), unlist(lst, use.names = FALSE))
     } else setNames(character(0), character(0))
+
     func_file <- unname(fun2file[func_names])
     func_file[is.na(func_file) | !nzchar(func_file)] <- "(unknown)"
 
-    # --- edges (function call graph) ---
+    # ---- edges (function call graph) ----
     edges <- as.data.frame(fr$edges, stringsAsFactors = FALSE)
-    if (!nrow(edges)) edges <- data.frame(SOURCE = character(0), TARGET = character(0), stringsAsFactors = FALSE)
-    if (isTRUE(internal_only) && nrow(edges)) {
+    if (!nrow(edges)) {
+        edges <- data.frame(SOURCE = character(0), TARGET = character(0), stringsAsFactors = FALSE)
+    } else if (isTRUE(internal_only)) {
         keep_src <- edges$SOURCE %in% func_names
         keep_tgt <- edges$TARGET %in% func_names
         edges <- edges[keep_src & keep_tgt, , drop = FALSE]
     }
 
-    # --- per-function counts (no lists) ---
+    # annotate edges with files
+    if (nrow(edges)) {
+        edges$file_src <- unname(fun2file[edges$SOURCE]); edges$file_src[is.na(edges$file_src)] <- "(unknown)"
+        edges$file_tgt <- unname(fun2file[edges$TARGET]); edges$file_tgt[is.na(edges$file_tgt)] <- "(unknown)"
+    } else {
+        edges$file_src <- character(0); edges$file_tgt <- character(0)
+    }
+
+    # ---- per-function counts (no lists) ----
     count_for <- function(tab, keys) { z <- as.integer(tab[keys]); z[is.na(z)] <- 0L; z }
     by_function <- data.frame(
         function_name = func_names,
@@ -401,15 +423,7 @@ pkg_function_map <- function(pkg_report, r_dir = "R", internal_only = TRUE) {
     )
     by_function <- by_function[order(by_function$file, by_function$function_name), ]
 
-    # --- annotate edges with files ---
-    if (nrow(edges)) {
-        edges$file_src <- unname(fun2file[edges$SOURCE]); edges$file_src[is.na(edges$file_src)] <- "(unknown)"
-        edges$file_tgt <- unname(fun2file[edges$TARGET]); edges$file_tgt[is.na(edges$file_tgt)] <- "(unknown)"
-    } else {
-        edges$file_src <- character(0); edges$file_tgt <- character(0)
-    }
-
-    # --- long map: one row per (file, function) ---
+    # ---- long map: one row per (file, function) ----
     split_by_file <- split(by_function, by_function$file)
     file_functions <- do.call(rbind, lapply(split_by_file, function(df) {
         if (!nrow(df)) return(NULL)
@@ -417,7 +431,7 @@ pkg_function_map <- function(pkg_report, r_dir = "R", internal_only = TRUE) {
     }))
     file_functions <- file_functions[order(file_functions$file, file_functions$function_name), ]
 
-    # --- per-file counts (no lists) ---
+    # ---- per-file counts (no lists) ----
     files <- names(split_by_file)
     by_file <- data.frame(
         file            = files,
@@ -428,15 +442,21 @@ pkg_function_map <- function(pkg_report, r_dir = "R", internal_only = TRUE) {
     )
     by_file <- by_file[order(by_file$file), ]
 
-    # --- file-to-file edges with counts ---
+    # ---- file-to-file edges with counts (bug-fixed) ----
     if (nrow(edges)) {
-        key <- paste(edges$file_src, edges$file_tgt, sep = " -> ")
-        cnt <- as.integer(table(key))
-        pr  <- do.call(rbind, strsplit(names(cnt), " -> ", fixed = TRUE))
-        file_edges <- data.frame(file_src = pr[,1], file_tgt = pr[,2],
-                                 n_edges = cnt, stringsAsFactors = FALSE)
-        file_edges <- file_edges[file_edges$file_src != file_edges$file_tgt, , drop = FALSE]
-        file_edges <- file_edges[order(file_edges$file_src, file_edges$file_tgt), ]
+        key_tbl <- table(paste(edges$file_src, edges$file_tgt, sep = " -> "))
+        if (length(key_tbl)) {
+            keys <- names(key_tbl)               # keep names BEFORE as.integer()
+            cnts <- as.integer(key_tbl)
+            pr   <- do.call(rbind, strsplit(keys, " -> ", fixed = TRUE))
+            file_edges <- data.frame(file_src = pr[,1], file_tgt = pr[,2],
+                                     n_edges = cnts, stringsAsFactors = FALSE)
+            file_edges <- file_edges[file_edges$file_src != file_edges$file_tgt, , drop = FALSE]
+            file_edges <- file_edges[order(file_edges$file_src, file_edges$file_tgt), ]
+        } else {
+            file_edges <- data.frame(file_src = character(0), file_tgt = character(0),
+                                     n_edges = integer(0), stringsAsFactors = FALSE)
+        }
     } else {
         file_edges <- data.frame(file_src = character(0), file_tgt = character(0),
                                  n_edges = integer(0), stringsAsFactors = FALSE)

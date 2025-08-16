@@ -4,7 +4,7 @@
 \alias{pkg_function_map}
 \title{Build per-file and per-function maps from a pkgnet report}
 \usage{
-pkg_function_map(pkg_report, r_dir = "R", internal_only = TRUE)
+pkg_function_map(pkg_report, r_dir = NULL, internal_only = TRUE)
 }
 \arguments{
 \item{pkg_report}{Result of \code{pkgnet::CreatePackageReport()}.}
