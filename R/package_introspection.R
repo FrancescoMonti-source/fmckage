@@ -1,0 +1,403 @@
+# package_introspection.R
+# Utilities for package code discovery & export
+# - functions_in_file / functions_in_dir / functions_table
+# - find_unused_functions
+# - dump_package_functions / export_package_functions
+# - pkg_function_map / expand_by_file
+#
+# Notes:
+# * No code is executed when listing; static parse only.
+# * pkg_function_map uses pkgnet only for the call graph; file mapping falls
+#   back to parsing your R/ dir, so it works even if pkgnet lacks file paths.
+
+
+#' List top-level functions defined in a single R file (static; no sourcing)
+#'
+#' Parses a file and returns the names of functions defined at the top level,
+#' i.e. expressions of the form `name <- function(...) {}` or
+#' `assign("name", function(...) {})`. No code is executed.
+#'
+#' @param path Path to a `.R` file.
+#' @return A character vector of function names found.
+#' @examples
+#' \dontrun{
+#' functions_in_file("R/gpt.R")
+#' }
+#' @export
+functions_in_file <- function(path) {
+    exprs <- tryCatch(parse(path, keep.source = TRUE),
+                      error = function(e) return(expression()))
+    out <- character()
+    is_fun <- function(x) is.call(x) && is.symbol(x[[1L]]) &&
+        identical(as.character(x[[1L]]), "function")
+
+    for (e in exprs) {
+        if (!is.call(e)) next
+        head <- as.character(e[[1L]])
+
+        # name <- function(...) { ... }   or   name = function(...) { ... }
+        if (head %in% c("<-", "=")) {
+            lhs <- e[[2L]]; rhs <- e[[3L]]
+            if (is_fun(rhs)) {
+                if (is.symbol(lhs))        out <- c(out, as.character(lhs))
+                else if (is.character(lhs) && length(lhs) == 1L) out <- c(out, lhs)
+            }
+        }
+
+        # assign("name", function(...) { ... })
+        if (identical(head, "assign") && length(e) >= 3L) {
+            nm  <- e[[2L]]; rhs <- e[[3L]]
+            if (is_fun(rhs)) {
+                if (is.symbol(nm))         out <- c(out, as.character(nm))
+                else if (is.character(nm) && length(nm) == 1L) out <- c(out, nm)
+            }
+        }
+    }
+
+    unique(out)
+}
+
+#' List top-level functions for every file in a directory
+#'
+#' @param dir Directory to scan (defaults to `"R"`).
+#' @return A named list: file name -> character vector of function names.
+#' @examples
+#' \dontrun{
+#' functions_in_dir("R")
+#' }
+#' @export
+functions_in_dir <- function(dir = "R") {
+    files <- list.files(dir, pattern = "\\.[Rr]$", full.names = TRUE)
+    res <- lapply(files, functions_in_file)
+    names(res) <- basename(files)
+    res
+}
+
+#' Table of functions by file
+#'
+#' Convenience wrapper returning a data.frame with one row per function.
+#'
+#' @inheritParams functions_in_dir
+#' @return A data.frame with columns `file` and `function_name`.
+#' @examples
+#' \dontrun{
+#' functions_table("R")
+#' }
+#' @export
+functions_table <- function(dir = "R") {
+    lst <- functions_in_dir(dir)
+    do.call(rbind, lapply(names(lst), function(f) {
+        fn <- lst[[f]]
+        if (!length(fn)) return(NULL)
+        data.frame(file = f, function_name = fn, row.names = NULL, check.names = FALSE)
+    }))
+}
+
+#' Find functions that are possibly unused inside a package source tree
+#'
+#' Flags functions defined in `R/` that are never referenced (as a call) in any
+#' other `.R` file in that directory. This is a static, approximate check.
+#'
+#' @param dir Package `R/` directory.
+#' @return A data.frame with columns: `file`, `function_name`, `def_file`,
+#'   `possibly_unused` (logical). Rows where `possibly_unused` is `TRUE`
+#'   are candidates for dead code review.
+#' @examples
+#' \dontrun{
+#' find_unused_functions("R")
+#' }
+#' @export
+find_unused_functions <- function(dir = "R") {
+    files <- list.files(dir, pattern = "\\.[Rr]$", full.names = TRUE)
+    tbl <- do.call(rbind, lapply(files, function(f) {
+        fn <- functions_in_file(f)
+        if (!length(fn)) return(NULL)
+        data.frame(file = basename(f), function_name = fn, def_file = f,
+                   row.names = NULL, check.names = FALSE)
+    }))
+    if (is.null(tbl) || !nrow(tbl)) {
+        return(data.frame(file=character(0), function_name=character(0),
+                          def_file=character(0), possibly_unused=logical(0)))
+    }
+    texts <- setNames(lapply(files, readLines, warn = FALSE), files)
+
+    is_used_elsewhere <- function(name, def_file) {
+        if (grepl("%.*%", name)) return(TRUE)                     # operators: ignore
+        pat <- paste0("\\b", gsub("([.^$|()*+?{}\\[\\]\\\\])", "\\\\\\1", name), "\\s*\\(")
+        for (f in files) {
+            if (f == def_file) next
+            if (any(grepl(pat, texts[[f]]))) return(TRUE)
+        }
+        FALSE
+    }
+
+    tbl$possibly_unused <- !mapply(is_used_elsewhere, tbl$function_name, tbl$def_file)
+    subset(tbl, possibly_unused &
+               !grepl("::", function_name, fixed = TRUE) &
+               !grepl("%.*%", function_name))
+}
+
+#' Dump package functions into a single R script
+#'
+#' Write top-level function definitions from either an **installed/loaded**
+#' package or from a **source tree** into one `.R` file you can `source()`.
+#' Exactly one of `package` or `dir` must be provided.
+#'
+#' @param out Output `.R` path.
+#' @param package Package name (installed/loaded mode).
+#' @param dir Package root directory containing `R/` (source-tree mode).
+#' @param only_exported If `TRUE`, include only exported functions.
+#' @param include_internal If `TRUE`, include non-exported functions
+#'   (ignored when `only_exported = TRUE`).
+#' @param pattern Optional regex to include only function names matching it.
+#' @return Invisibly returns the normalized `out` path.
+#' @examples
+#' \dontrun{
+#' dump_package_functions("stats_dump.R", package = "stats", only_exported = TRUE)
+#' dump_package_functions("mypkg_dump.R", dir = "/path/to/pkg")
+#' }
+#' @export
+dump_package_functions <- function(out,
+                                      package = NULL,
+                                      dir = NULL,
+                                      only_exported = FALSE,
+                                      include_internal = TRUE,
+                                      pattern = NULL) {
+    if (is.null(out) || !nzchar(out)) stop("`out` must be a file path.", call. = FALSE)
+    if (xor(is.null(package), is.null(dir)) == FALSE) {
+        stop("Provide exactly one of `package` or `dir`.", call. = FALSE)
+    }
+
+    header <- c(
+        sprintf("# Generated by fmckage::dump_package_functions on %s", as.character(Sys.time())),
+        if (!is.null(package)) sprintf("# Package (installed): %s", package)
+        else sprintf("# Source tree: %s", normalizePath(dir, winslash = "/", mustWork = FALSE)),
+        ""
+    )
+    write_section <- function(con, name, lines) {
+        writeLines(sprintf("# --- %s ---", name), con, useBytes = TRUE)
+        writeLines(lines, con, useBytes = TRUE)
+        writeLines("", con, useBytes = TRUE)
+    }
+
+    con <- file(out, "w", encoding = "UTF-8"); on.exit(close(con), add = TRUE)
+    writeLines(header, con, useBytes = TRUE)
+
+    if (!is.null(package)) {
+        if (!requireNamespace(package, quietly = TRUE)) {
+            stop("Package not available: ", package, call. = FALSE)
+        }
+        ns <- getNamespace(package)
+        exports <- tryCatch(getNamespaceExports(package), error = function(e) character(0))
+        objs <- as.list(ns, all.names = TRUE)
+        funs <- names(objs)[vapply(objs, is.function, logical(1))]
+        if (isTRUE(only_exported)) funs <- intersect(funs, exports)
+        if (!isTRUE(only_exported) && !isTRUE(include_internal)) {
+            funs <- funs[substr(funs, 1L, 1L) != "."]
+        }
+        if (!is.null(pattern) && nzchar(pattern)) funs <- grep(pattern, funs, value = TRUE)
+        funs <- funs[!vapply(mget(funs, envir = ns, inherits = FALSE), is.primitive, logical(1))]
+        if (!length(funs)) stop("No functions to dump from namespace: ", package, call. = FALSE)
+
+        for (nm in sort(funs)) {
+            tmp <- tempfile(fileext = ".R")
+            dump(nm, file = tmp, envir = ns, control = NULL)
+            write_section(con, nm, readLines(tmp, warn = FALSE))
+            unlink(tmp)
+        }
+        return(invisible(normalizePath(out, winslash = "/", mustWork = FALSE)))
+    }
+
+    # source-tree mode
+    rdir <- file.path(dir, "R")
+    if (!dir.exists(rdir)) stop("Directory does not contain an 'R/' folder: ", dir, call. = FALSE)
+    files <- list.files(rdir, pattern = "\\.[Rr]$", full.names = TRUE)
+    if (!length(files)) stop("No .R files in ", rdir, call. = FALSE)
+
+    # exported names (best-effort) for only_exported
+    exports <- character(0)
+    if (isTRUE(only_exported)) {
+        nsfile <- file.path(dir, "NAMESPACE")
+        if (file.exists(nsfile)) {
+            lines <- readLines(nsfile, warn = FALSE)
+            m <- gregexpr("export\\s*\\(([^\\)]*)\\)", lines, perl = TRUE)
+            got <- unlist(regmatches(lines, m))
+            names_str <- gsub("^export\\s*\\(|\\)$", "", got)
+            names_str <- gsub("\\s", "", names_str)
+            parts <- unlist(strsplit(names_str, ","))
+            parts <- gsub('^"|"$', "", parts)
+            exports <- unique(parts[nzchar(parts)])
+        } else {
+            warning("NAMESPACE not found; cannot restrict to exported functions.", call. = FALSE)
+        }
+    }
+
+    is_fun_call <- function(x) is.call(x) && is.symbol(x[[1L]]) &&
+        identical(as.character(x[[1L]]), "function")
+
+    for (path in files) {
+        txt   <- readLines(path, warn = FALSE)
+        exprs <- tryCatch(parse(text = txt, keep.source = TRUE),
+                          error = function(e) return(expression()))
+
+        for (e in exprs) {
+            if (!is.call(e)) next
+            head <- as.character(e[[1L]])
+            nm <- NULL
+
+            if (head %in% c("<-","=")) {
+                lhs <- e[[2L]]; rhs <- e[[3L]]
+                if (is_fun_call(rhs)) {
+                    if (is.symbol(lhs)) nm <- as.character(lhs)
+                    else if (is.character(lhs) && length(lhs) == 1L) nm <- lhs
+                }
+            } else if (identical(head, "assign") && length(e) >= 3L) {
+                nm  <- e[[2L]]; rhs <- e[[3L]]
+                if (is_fun_call(rhs)) {
+                    if (is.symbol(nm)) nm <- as.character(nm)
+                    else if (is.character(nm) && length(nm) == 1L) nm <- nm
+                    else nm <- NULL
+                } else nm <- NULL
+            }
+
+            if (is.null(nm) || !nzchar(nm)) next
+            if (isTRUE(only_exported) && length(exports) && !(nm %in% exports)) next
+            if (!isTRUE(only_exported) && !isTRUE(include_internal) && substr(nm,1L,1L) == ".") next
+            if (!is.null(pattern) && nzchar(pattern) && !grepl(pattern, nm)) next
+
+            sr <- attr(e, "srcref")
+            block <- if (!is.null(sr)) paste(getSrcLines(sr), collapse = "\n")
+            else paste(deparse(e, width.cutoff = 500L), collapse = "\n")
+
+            write_section(con, nm, block)
+        }
+    }
+
+    invisible(normalizePath(out, winslash = "/", mustWork = FALSE))
+}
+
+#' Export (dump) all functions from an installed package to one .R file
+#'
+#' Thin wrapper for `dump_package_functions()` (installed mode).
+#'
+#' @param package_name Package name.
+#' @param path Output `.R` path.
+#' @param only_exported If `TRUE`, only exported functions.
+#' @return Invisibly returns normalized `path`.
+#' @export
+export_package_functions <- function(package_name, path, only_exported = TRUE) {
+    dump_package_functions(out = path, package = package_name, only_exported = only_exported)
+}
+
+#' Build per-file and per-function maps from a pkgnet report
+#'
+#' Produces both views:
+#' - `by_function`: one row per function with its source file, outgoing calls
+#'   (`calls`) and incoming calls (`called_by`) as list-cols, plus counts.
+#' - `by_file`: one row per file with the list of functions and summary counts.
+#'
+#' Your pkgnet version may not include file paths in nodes; in that case we
+#' statically parse `r_dir` to map function -> file.
+#'
+#' @param pkg_report Result of `pkgnet::CreatePackageReport()`.
+#' @param r_dir Fallback directory to scan for `.R` files (default `"R"`).
+#' @param internal_only If TRUE, keep only edges where both ends are your package's functions.
+#' @return A list with `by_function` (data.frame), `by_file` (data.frame),
+#'   and `by_file_list` (nested list: file -> function -> list(calls, called_by)).
+#' @examples
+#' \dontrun{
+#' library(pkgnet)
+#' pkg_report <- CreatePackageReport(pkg_name = "yourpkg")
+#' map <- pkg_function_map(pkg_report, r_dir = "R")
+#' map$by_function; map$by_file
+#' }
+#' @export
+pkg_function_map <- function(pkg_report, r_dir = "R", internal_only = TRUE) {
+    fr <- pkg_report$FunctionReporter
+    nodes <- as.data.frame(fr$nodes, stringsAsFactors = FALSE)
+    if (!nrow(nodes)) stop("pkgnet FunctionReporter has no nodes; did analysis run?", call. = FALSE)
+
+    name_col <- if ("name" %in% names(nodes)) "name" else if ("node" %in% names(nodes)) "node" else NA_character_
+    if (is.na(name_col)) stop("Couldn't find a function-name column in FunctionReporter$nodes.")
+    func_names <- as.character(nodes[[name_col]])
+
+    # map functions -> files by static parse of R/ (robust across pkgnet versions)
+    lst <- functions_in_dir(r_dir)  # file -> vec of function names
+    fun2file <- if (length(lst)) setNames(rep(names(lst), lengths(lst)), unlist(lst, use.names = FALSE))
+    else setNames(character(0), character(0))
+    file_vec <- unname(fun2file[func_names])
+    file_vec[is.na(file_vec) | !nzchar(file_vec)] <- "(unknown)"
+
+    by_function <- data.frame(
+        function_name = func_names,
+        file          = file_vec,
+        stringsAsFactors = FALSE
+    )
+
+    # edges: function call graph (SOURCE -> TARGET)
+    edges <- as.data.frame(fr$edges, stringsAsFactors = FALSE)
+    if (!nrow(edges)) {
+        edges <- data.frame(SOURCE = character(0), TARGET = character(0), stringsAsFactors = FALSE)
+    } else if (isTRUE(internal_only)) {
+        keep_src <- edges$SOURCE %in% func_names
+        keep_tgt <- edges$TARGET %in% func_names
+        edges <- edges[keep_src & keep_tgt, , drop = FALSE]
+    }
+
+    split_targets <- if (nrow(edges)) split(edges$TARGET, edges$SOURCE) else list()
+    split_sources <- if (nrow(edges)) split(edges$SOURCE, edges$TARGET) else list()
+
+    calls_list <- lapply(by_function$function_name, function(fn) {
+        x <- split_targets[[fn]]; if (is.null(x)) character(0) else sort(unique(x))
+    })
+    called_by_list <- lapply(by_function$function_name, function(fn) {
+        x <- split_sources[[fn]]; if (is.null(x)) character(0) else sort(unique(x))
+    })
+
+    by_function$calls       <- calls_list
+    by_function$called_by   <- called_by_list
+    by_function$calls_out_n <- vapply(calls_list, length, integer(1))
+    by_function$calls_in_n  <- vapply(called_by_list, length, integer(1))
+
+    o <- order(by_function$file, by_function$function_name)
+    by_function <- by_function[o, ]
+
+    split_by_file <- split(by_function, by_function$file)
+    files <- names(split_by_file)
+
+    by_file <- data.frame(
+        file            = files,
+        n_functions     = vapply(split_by_file, nrow, integer(1)),
+        total_calls_out = vapply(split_by_file, function(df) sum(df$calls_out_n), integer(1)),
+        total_calls_in  = vapply(split_by_file, function(df) sum(df$calls_in_n), integer(1)),
+        stringsAsFactors = FALSE
+    )
+    by_file$functions <- I(lapply(split_by_file, function(df) sort(df$function_name)))
+    by_file <- by_file[order(by_file$file), ]
+
+    by_file_list <- lapply(split_by_file, function(df) {
+        setNames(lapply(seq_len(nrow(df)), function(i) {
+            list(calls = df$calls[[i]], called_by = df$called_by[[i]])
+        }), df$function_name)
+    })
+
+    list(
+        by_function  = by_function,
+        by_file      = by_file,
+        by_file_list = by_file_list
+    )
+}
+
+#' Expand the per-file summary to one row per function (internal)
+#' @keywords internal
+#' @noRd
+expand_by_file <- function(by_file) {
+    do.call(rbind, lapply(seq_len(nrow(by_file)), function(i) {
+        fns <- by_file$functions[[i]]
+        if (!length(fns)) return(NULL)
+        data.frame(file = by_file$file[i],
+                   function_name = fns,
+                   row.names = NULL, check.names = FALSE,
+                   stringsAsFactors = FALSE)
+    }))
+}
