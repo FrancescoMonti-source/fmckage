@@ -367,22 +367,24 @@ export_package_functions <- function(package_name, path, only_exported = TRUE) {
 # Requires: functions_in_dir(r_dir) -> list(file -> character vector of function names)
 # Long-format function/file map from a pkgnet report (flat tables only)
 # Requires: functions_in_dir(r_dir)
+# Long-format function/file map from a pkgnet report (flat tables only)
+# Requires: functions_in_dir(r_dir) -> list(file -> character vector of function names)
 pkg_function_map <- function(pkg_report,
                              r_dir = NULL,
                              internal_only = TRUE,
-                             package = NULL,         # optional: use installed ns to resolve unknowns
-                             fill_namespace = TRUE   # set FALSE to skip namespace fallback
-) {
+                             package = NULL,         # optional: installed pkg name for srcref fallback
+                             fill_namespace = TRUE)  # set FALSE to skip namespace fallback
+{
     fr <- pkg_report$FunctionReporter
 
-    # -- nodes: functions in your package --
+    # ---- nodes: functions in your package ----
     nodes <- as.data.frame(fr$nodes, stringsAsFactors = FALSE)
     if (!nrow(nodes)) stop("pkgnet FunctionReporter has no nodes; did analysis run?", call. = FALSE)
     name_col <- if ("name" %in% names(nodes)) "name" else if ("node" %in% names(nodes)) "node" else NA_character_
     if (is.na(name_col)) stop("Couldn't find a function-name column in FunctionReporter$nodes.")
     func_names <- as.character(nodes[[name_col]])
 
-    # -- choose r_dir (where your .R files live) --
+    # ---- choose r_dir (where your .R files live) ----
     if (is.null(r_dir)) {
         pkg_path <- tryCatch(pkg_report$pkg_path, error = function(e) NULL)
         if (!is.null(pkg_path) && dir.exists(file.path(pkg_path, "R"))) {
@@ -392,40 +394,60 @@ pkg_function_map <- function(pkg_report,
         }
     }
 
-    # -- map functions -> files by parsing r_dir --
+    # ---- map functions -> files by parsing r_dir ----
     lst <- functions_in_dir(r_dir)  # list: file -> character vector of names
     fun2file <- if (length(lst)) {
         setNames(rep(names(lst), lengths(lst)), unlist(lst, use.names = FALSE))
     } else setNames(character(0), character(0))
+
     func_file <- unname(fun2file[func_names])
     func_file[is.na(func_file) | !nzchar(func_file)] <- "(unknown)"
 
-    # -- optional: fill unknowns using installed namespace srcref --
+    # ---- Pass 1: regex fallback in source tree (catches non-literal defs) ----
+    missing <- which(func_file == "(unknown)")
+    if (length(missing)) {
+        r_files <- list.files(r_dir, pattern = "\\.[Rr]$", full.names = TRUE)
+        r_base  <- basename(r_files)
+        # preload file lines once
+        r_lines <- lapply(r_files, function(f) readLines(f, warn = FALSE))
+        names(r_lines) <- r_files
+        esc <- function(x) gsub("([.^$|()*+?{}\\[\\]\\\\])", "\\\\\\1", x)
+
+        for (j in missing) {
+            nm  <- func_names[j]
+            pat <- paste0("^\\s*(`?", esc(nm), "`?)\\s*(<-|=)\\s*")  # top-level assign
+            hit <- vapply(r_lines, function(lines) any(grepl(pat, lines, perl = TRUE)), logical(1))
+            if (any(hit)) func_file[j] <- r_base[which(hit)[1L]]
+        }
+    }
+
+    # ---- Pass 2: namespace srcref fallback (optional) ----
     if (fill_namespace && !is.null(package) && requireNamespace(package, quietly = TRUE)) {
         ns <- getNamespace(package)
-        unknown_idx <- which(func_file == "(unknown)")
-        if (length(unknown_idx)) {
-            get_srcfile_basename <- function(f) {
-                sr <- attr(f, "srcref", exact = TRUE)
-                if (!is.null(sr)) {
-                    sf <- attr(sr, "srcfile", exact = TRUE)
-                    fn <- tryCatch(sf$filename, error = function(e) NULL)
-                    if (is.character(fn) && length(fn) == 1L && nzchar(fn)) return(basename(fn))
-                }
-                NULL
+        missing <- which(func_file == "(unknown)")
+        if (length(missing)) {
+            get_srcfile_basename <- function(obj) {
+                sr <- attr(obj, "srcref", exact = TRUE)
+                if (is.null(sr)) return(NULL)
+                sf <- attr(sr, "srcfile", exact = TRUE)
+                fn <- tryCatch(sf$filename, error = function(e) NULL)
+                if (is.character(fn) && length(fn) == 1L && nzchar(fn)) basename(fn) else NULL
             }
-            for (i in unknown_idx) {
-                nm <- func_names[i]
+            for (j in missing) {
+                nm <- func_names[j]
                 if (exists(nm, envir = ns, inherits = FALSE)) {
                     obj <- get(nm, envir = ns, inherits = FALSE)
                     fn  <- get_srcfile_basename(obj)
-                    if (!is.null(fn)) func_file[i] <- fn
+                    if (!is.null(fn)) func_file[j] <- fn
                 }
             }
         }
     }
 
-    # -- edges (function call graph) --
+    # Create a final name->file lookup after fallbacks
+    name2file <- setNames(func_file, func_names)
+
+    # ---- edges (function call graph) ----
     edges <- as.data.frame(fr$edges, stringsAsFactors = FALSE)
     if (!nrow(edges)) {
         edges <- data.frame(SOURCE = character(0), TARGET = character(0), stringsAsFactors = FALSE)
@@ -435,15 +457,15 @@ pkg_function_map <- function(pkg_report,
         edges <- edges[keep_src & keep_tgt, , drop = FALSE]
     }
 
-    # annotate edges with files
+    # annotate edges with files using the final lookup
     if (nrow(edges)) {
-        edges$file_src <- unname(fun2file[edges$SOURCE]); edges$file_src[is.na(edges$file_src)] <- "(unknown)"
-        edges$file_tgt <- unname(fun2file[edges$TARGET]); edges$file_tgt[is.na(edges$file_tgt)] <- "(unknown)"
+        edges$file_src <- unname(name2file[edges$SOURCE]); edges$file_src[is.na(edges$file_src)] <- "(unknown)"
+        edges$file_tgt <- unname(name2file[edges$TARGET]); edges$file_tgt[is.na(edges$file_tgt)] <- "(unknown)"
     } else {
         edges$file_src <- character(0); edges$file_tgt <- character(0)
     }
 
-    # -- per-function counts (no lists) --
+    # ---- per-function counts (flat) ----
     count_for <- function(tab, keys) { z <- as.integer(tab[keys]); z[is.na(z)] <- 0L; z }
     by_function <- data.frame(
         function_name = func_names,
@@ -455,7 +477,7 @@ pkg_function_map <- function(pkg_report,
     by_function <- by_function[order(by_function$file, by_function$function_name), ]
     rownames(by_function) <- NULL
 
-    # --long map: one row per (file, function) --
+    # ---- long map: one row per (file, function) ----
     split_by_file <- split(by_function, by_function$file)
     file_functions <- do.call(rbind, lapply(split_by_file, function(df) {
         if (!nrow(df)) return(NULL)
@@ -463,12 +485,12 @@ pkg_function_map <- function(pkg_report,
     }))
     if (!is.null(file_functions) && nrow(file_functions)) {
         file_functions <- file_functions[order(file_functions$file, file_functions$function_name), ]
-        rownames(file_functions) <- NULL      # drop the ".1" style rownames
+        rownames(file_functions) <- NULL
     } else {
         file_functions <- data.frame(file = character(0), function_name = character(0), stringsAsFactors = FALSE)
     }
 
-    # -- per-file counts (no lists) --
+    # ---- per-file counts (flat) ----
     files <- names(split_by_file)
     by_file <- data.frame(
         file            = files,
@@ -480,7 +502,7 @@ pkg_function_map <- function(pkg_report,
     by_file <- by_file[order(by_file$file), ]
     rownames(by_file) <- NULL
 
-    # -- file-to-file edges with counts (keep names BEFORE coercion) --
+    # ---- file-to-file edges with counts (flat, bug-fixed) ----
     if (nrow(edges)) {
         key_tbl <- table(paste(edges$file_src, edges$file_tgt, sep = " -> "))
         if (length(key_tbl)) {
@@ -509,6 +531,7 @@ pkg_function_map <- function(pkg_report,
         file_edges     = file_edges       # one row per (file_src, file_tgt) with counts
     )
 }
+
 
 
 #' Expand the per-file summary to one row per function (internal)
