@@ -2,19 +2,29 @@
 % Please edit documentation in R/find_in_sources.R
 \name{find_in_sources}
 \alias{find_in_sources}
-\title{Grep through package sources}
+\title{Grep (and optionally replace) through package sources}
 \usage{
 find_in_sources(
   pattern,
+  replacement = NULL,
+  write = FALSE,
   dirs = c("R", "src", "inst"),
   include_ext = c("\\\\.R$", "\\\\.r$", "\\\\.Rmd$", "\\\\.Rnw$"),
-  perl = TRUE
+  excludes = character(0),
+  perl = TRUE,
+  ignore_case = FALSE,
+  verbose = interactive()
 )
 }
 \arguments{
-\item{pattern}{Character scalar. Regular expression to search for. Passed to
-\code{\link[base:grep]{base::grepl()}} as \code{pattern}. Remember to double-escape backslashes in R
-strings.}
+\item{pattern}{Character(1). Regular expression to search for. Passed to
+\code{\link[base:grep]{base::grepl()}} and \code{\link[base:grep]{base::gsub()}}. Remember to double-escape backslashes.}
+
+\item{replacement}{Character(1) or \code{NULL}. If provided, enables replace mode:
+matches will be substituted with this string (supports backreferences).}
+
+\item{write}{Logical. When \code{TRUE} and \code{replacement} is provided, write changes
+to disk. Defaults to \code{FALSE} (dry run).}
 
 \item{dirs}{Character vector of directories to search recursively.
 Defaults to \code{c("R", "src", "inst")}.}
@@ -23,46 +33,92 @@ Defaults to \code{c("R", "src", "inst")}.}
 define which files to include (e.g. \code{"\\\\\\\\.R$"}, \code{"\\\\\\\\.Rmd$"}). The
 entries are combined with \code{|} into a single pattern for \code{\link[base:list.files]{base::list.files()}}.}
 
-\item{perl}{Logical; whether to use PCRE via \code{perl = TRUE} in \code{\link[base:grep]{base::grepl()}}.
-Defaults to \code{TRUE}.}
+\item{excludes}{Character vector of anchored path prefixes to skip
+(e.g., \code{"renv"}, \code{"packrat"}, \code{"inst/doc"}). Default \code{character(0)}.}
+
+\item{perl}{Logical; whether to use PCRE via \code{perl = TRUE} in \code{\link[base:grep]{base::grepl()}}
+and \code{\link[base:grep]{base::gsub()}}. Defaults to \code{TRUE}.}
+
+\item{ignore_case}{Logical; case-insensitive search/replace. Defaults to \code{FALSE}.}
+
+\item{verbose}{Logical; print per-line matches (always printed in search-only
+mode). In replace mode, lines are printed only when \code{verbose = TRUE}.}
 }
 \value{
-Invisibly returns a \code{data.frame} with columns:
+\itemize{
+\item \strong{Search-only:} (when \code{replacement = NULL}) Invisibly returns a \code{data.frame}
+with columns:
 \describe{
 \item{file}{File path (character).}
 \item{line}{1-based line number (integer).}
 \item{code}{Matched line, trimmed (character).}
 }
-If no matches are found, a message \code{"No matches."} is emitted and \code{NULL} is
-returned invisibly.
+If no matches are found, prints \code{"No matches."} and returns \code{NULL} invisibly.
+\item \strong{Replace mode:} (when \code{replacement} provided) Invisibly returns a \code{list}
+with:
+\describe{
+\item{ok}{Logical scalar.}
+\item{files}{Data frame with per-file stats:
+\code{file}, \code{changed}, \code{hits}, \code{bytes_in}, \code{bytes_out}.}
+\item{total_hits}{Integer total substitutions across all files.}
+\item{written}{Logical scalar indicating if writes were requested.}
+\item{meta}{List of run settings.}
+}
+}
 }
 \description{
 Recursively search common package directories for files with selected
-extensions and print lines that match a regular expression. Useful for
-quickly locating symbols, TODOs, or API usage across \verb{R/}, \verb{src/}, and \verb{inst/}.
+extensions and print lines that match a regular expression. If \code{replacement}
+is provided, perform a global substitution on each matching file (entire file
+text, not only the matched lines), with an optional dry run.
 }
 \details{
 For each matching file, lines are read as UTF-8 and tested with
-\code{\link[base:grep]{base::grepl()}}. Files that cannot be read are silently skipped. Each hit is
-printed as \code{"path:line | code"} and also collected into a data frame that is
-returned invisibly.
+\code{\link[base:grep]{base::grepl()}}. Files that cannot be read are silently skipped.
+\subsection{Modes}{
+\itemize{
+\item \strong{Search-only} (default): behave like the original \code{find_in_sources()}.
+Prints \code{"path:line | code"} for each hit and \strong{invisibly returns a data
+frame} of hits.
+\item \strong{Search-and-replace}: if \code{replacement} is non-\code{NULL}, apply
+\code{gsub(pattern, replacement, file_text, perl = perl, ignore.case = ignore_case)}
+to the whole file. When \code{write = FALSE} (default), it's a \strong{dry run} that
+reports what would change. When \code{write = TRUE}, changes are written back.
+}
+}
 }
 \examples{
 \dontrun{
+# --- Search only ---
 # Find all TODO markers anywhere under the default dirs
 find_in_sources("TODO")
 
 # Find where function 'foo' is defined/assigned
 find_in_sources("^\\\\s*foo\\\\s*<-")
 
-# Look for .Call usages in R/ and src/
-find_in_sources("\\\\.Call\\\\(", dirs = c("R", "src"))
-
 # Restrict search to R and Rmd files
 find_in_sources("setClass\\\\(", include_ext = c("\\\\\\\\.R$", "\\\\\\\\.Rmd$"))
+
+# --- Search and replace (dry run first) ---
+# Would rename ".old_api(" to ".new_api(" across R/ and tests/
+res <- find_in_sources(
+  pattern     = "(\\\\.)old_api\\\\b",
+  replacement = "\\\\1new_api",
+  dirs        = c("R","tests"),
+  write       = FALSE
+)
+res$total_hits; subset(res$files, changed)
+
+# Apply for real:
+find_in_sources(
+  pattern     = "(\\\\.)old_api\\\\b",
+  replacement = "\\\\1new_api",
+  dirs        = c("R","tests"),
+  write       = TRUE
+)
 }
 
 }
 \seealso{
-\code{\link[base:grep]{base::grepl()}}, \code{\link[base:list.files]{base::list.files()}}
+\code{\link[base:grep]{base::grepl()}}, \code{\link[base:grep]{base::gsub()}}, \code{\link[base:list.files]{base::list.files()}}
 }

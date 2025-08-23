@@ -14,5 +14,6 @@ Remotes: FrancescoMonti-source/fmckage
 Imports:
     rvest,
     tidyverse,
-    ggplot2
+    httr2,
+    rlang
 Roxygen: list(markdown = TRUE)
