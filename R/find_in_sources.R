@@ -74,16 +74,17 @@
 #' res <- find_in_sources(
 #'   pattern     = "(\\.)old_api\\b",
 #'   replacement = "\\1new_api",
-#'   dirs        = c("R","tests"),
+#'   dirs        = c("R", "tests"),
 #'   write       = FALSE
 #' )
-#' res$total_hits; subset(res$files, changed)
+#' res$total_hits
+#' subset(res$files, changed)
 #'
 #' # Apply for real:
 #' find_in_sources(
 #'   pattern     = "(\\.)old_api\\b",
 #'   replacement = "\\1new_api",
-#'   dirs        = c("R","tests"),
+#'   dirs        = c("R", "tests"),
 #'   write       = TRUE
 #' )
 #' }
@@ -99,102 +100,117 @@ find_in_sources <- function(pattern,
                             perl = TRUE,
                             ignore_case = FALSE,
                             verbose = interactive()) {
-    stopifnot(length(pattern) == 1)
-    # discover files
-    files <- unlist(lapply(dirs, function(d) {
-        if (!dir.exists(d)) return(character())
-        list.files(d,
-                   pattern = paste(include_ext, collapse = "|"),
-                   recursive = TRUE, full.names = TRUE)
-    }), use.names = FALSE)
-
-    # exclude prefixes (anchored)
-    if (length(excludes)) {
-        excl_rx <- paste0("^", gsub("\\.", "\\\\.", excludes))
-        keep <- !vapply(files, function(p)
-            any(grepl(paste(excl_rx, collapse = "|"), p)),
-            logical(1))
-        files <- files[keep]
+  stopifnot(length(pattern) == 1)
+  # discover files
+  files <- unlist(lapply(dirs, function(d) {
+    if (!dir.exists(d)) {
+      return(character())
     }
+    list.files(d,
+      pattern = paste(include_ext, collapse = "|"),
+      recursive = TRUE, full.names = TRUE
+    )
+  }), use.names = FALSE)
 
-    # search-only mode
-    if (is.null(replacement)) {
-        out <- list()
-        for (f in files) {
-            txt <- tryCatch(readLines(f, warn = FALSE, encoding = "UTF-8"),
-                            error = function(e) NULL)
-            if (is.null(txt)) next
-            hits <- grepl(pattern, txt, perl = perl, ignore.case = ignore_case)
-            if (any(hits)) {
-                ln <- which(hits)
-                df <- data.frame(
-                    file = f,
-                    line = ln,
-                    code = trimws(txt[ln]),
-                    row.names = NULL,
-                    stringsAsFactors = FALSE
-                )
-                out[[length(out) + 1L]] <- df
-                # pretty print lines
-                apply(df, 1, function(r)
-                    cat(sprintf("%s:%s | %s\n", r["file"], r["line"], r["code"])))
-            }
-        }
-        if (!length(out)) return(invisible(message("No matches.")))
-        return(invisible(do.call(rbind, out)))
-    }
+  # exclude prefixes (anchored)
+  if (length(excludes)) {
+    excl_rx <- paste0("^", gsub("\\.", "\\\\.", excludes))
+    keep <- !vapply(
+      files, function(p) {
+        any(grepl(paste(excl_rx, collapse = "|"), p))
+      },
+      logical(1)
+    )
+    files <- files[keep]
+  }
 
-    # replace mode (whole-file gsub)
-    files_rows <- vector("list", length(files))
-    total_hits <- 0L
-    for (i in seq_along(files)) {
-        f <- files[[i]]
-        txt <- tryCatch(readLines(f, warn = FALSE, encoding = "UTF-8"),
-                        error = function(e) NULL)
-        if (is.null(txt)) next
-        before <- paste0(txt, collapse = "\n")
-
-        # count matches via gregexpr on full text (more accurate than line-wise sum)
-        m <- gregexpr(pattern, before, perl = perl, ignore.case = ignore_case)[[1]]
-        n_hits <- if (length(m) == 1L && m[1] == -1L) 0L else length(m)
-        after  <- if (n_hits > 0L) {
-            gsub(pattern, replacement, before, perl = perl, ignore.case = ignore_case)
-        } else before
-
-        changed <- !identical(before, after)
-        if (changed && isTRUE(write)) {
-            # write UTF-8, preserve bytes explicitly
-            writeLines(enc2utf8(after), f, useBytes = TRUE)
-        }
-
-        if (verbose && n_hits > 0L) {
-            cat(sprintf("%s: %d substitution(s)%s\n",
-                        f, n_hits, if (!write) " (dry run)" else ""))
-        }
-
-        files_rows[[i]] <- data.frame(
-            file = f,
-            changed = changed,
-            hits = n_hits,
-            bytes_in = nchar(before, type = "bytes"),
-            bytes_out = nchar(after,  type = "bytes"),
-            stringsAsFactors = FALSE
+  # search-only mode
+  if (is.null(replacement)) {
+    out <- list()
+    for (f in files) {
+      txt <- tryCatch(readLines(f, warn = FALSE, encoding = "UTF-8"),
+        error = function(e) NULL
+      )
+      if (is.null(txt)) next
+      hits <- grepl(pattern, txt, perl = perl, ignore.case = ignore_case)
+      if (any(hits)) {
+        ln <- which(hits)
+        df <- data.frame(
+          file = f,
+          line = ln,
+          code = trimws(txt[ln]),
+          row.names = NULL,
+          stringsAsFactors = FALSE
         )
-        total_hits <- total_hits + n_hits
+        out[[length(out) + 1L]] <- df
+        # pretty print lines
+        apply(df, 1, function(r) {
+          cat(sprintf("%s:%s | %s\n", r["file"], r["line"], r["code"]))
+        })
+      }
+    }
+    if (!length(out)) {
+      return(invisible(message("No matches.")))
+    }
+    return(invisible(do.call(rbind, out)))
+  }
+
+  # replace mode (whole-file gsub)
+  files_rows <- vector("list", length(files))
+  total_hits <- 0L
+  for (i in seq_along(files)) {
+    f <- files[[i]]
+    txt <- tryCatch(readLines(f, warn = FALSE, encoding = "UTF-8"),
+      error = function(e) NULL
+    )
+    if (is.null(txt)) next
+    before <- paste0(txt, collapse = "\n")
+
+    # count matches via gregexpr on full text (more accurate than line-wise sum)
+    m <- gregexpr(pattern, before, perl = perl, ignore.case = ignore_case)[[1]]
+    n_hits <- if (length(m) == 1L && m[1] == -1L) 0L else length(m)
+    after <- if (n_hits > 0L) {
+      gsub(pattern, replacement, before, perl = perl, ignore.case = ignore_case)
+    } else {
+      before
     }
 
-    files_df <- do.call(rbind, files_rows)
-    # drop rows for unreadable files (NULL txt) which would be NA; keep only non-NA hits
-    files_df <- files_df[!is.na(files_df$hits), , drop = FALSE]
+    changed <- !identical(before, after)
+    if (changed && isTRUE(write)) {
+      # write UTF-8, preserve bytes explicitly
+      writeLines(enc2utf8(after), f, useBytes = TRUE)
+    }
 
-    invisible(list(
-        ok = TRUE,
-        files = files_df[order(files_df$changed, decreasing = TRUE), ],
-        total_hits = total_hits,
-        written = isTRUE(write),
-        meta = list(
-            dirs = dirs, include_ext = include_ext, excludes = excludes,
-            perl = perl, ignore_case = ignore_case
-        )
-    ))
+    if (verbose && n_hits > 0L) {
+      cat(sprintf(
+        "%s: %d substitution(s)%s\n",
+        f, n_hits, if (!write) " (dry run)" else ""
+      ))
+    }
+
+    files_rows[[i]] <- data.frame(
+      file = f,
+      changed = changed,
+      hits = n_hits,
+      bytes_in = nchar(before, type = "bytes"),
+      bytes_out = nchar(after, type = "bytes"),
+      stringsAsFactors = FALSE
+    )
+    total_hits <- total_hits + n_hits
+  }
+
+  files_df <- do.call(rbind, files_rows)
+  # drop rows for unreadable files (NULL txt) which would be NA; keep only non-NA hits
+  files_df <- files_df[!is.na(files_df$hits), , drop = FALSE]
+
+  invisible(list(
+    ok = TRUE,
+    files = files_df[order(files_df$changed, decreasing = TRUE), ],
+    total_hits = total_hits,
+    written = isTRUE(write),
+    meta = list(
+      dirs = dirs, include_ext = include_ext, excludes = excludes,
+      perl = perl, ignore_case = ignore_case
+    )
+  ))
 }

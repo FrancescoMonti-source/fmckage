@@ -30,26 +30,26 @@
 #'
 #' @export
 align_vectors <- function(...) {
-    # Capture the vectors and their names
-    vectors <- list(...)
-    vector_names <- sapply(substitute(list(...))[-1], deparse)
+  # Capture the vectors and their names
+  vectors <- list(...)
+  vector_names <- sapply(substitute(list(...))[-1], deparse)
 
-    # Create a unique ordered list of all elements across all vectors
-    all_elements <- unique(unlist(vectors))
+  # Create a unique ordered list of all elements across all vectors
+  all_elements <- unique(unlist(vectors))
 
-    # Align each vector to `all_elements`, filling with NA where necessary
-    aligned_data <- lapply(vectors, function(vec) {
-        ifelse(all_elements %in% vec, all_elements, NA)
-    })
+  # Align each vector to `all_elements`, filling with NA where necessary
+  aligned_data <- lapply(vectors, function(vec) {
+    ifelse(all_elements %in% vec, all_elements, NA)
+  })
 
-    # Combine the aligned vectors into a data frame
-    result <- as.data.frame(aligned_data)
+  # Combine the aligned vectors into a data frame
+  result <- as.data.frame(aligned_data)
 
-    # Set column names using the captured names
-    colnames(result) <- vector_names
+  # Set column names using the captured names
+  colnames(result) <- vector_names
 
-    # Remove rows where all elements are NA
-    result <- result[rowSums(is.na(result)) < ncol(result), ]
+  # Remove rows where all elements are NA
+  result <- result[rowSums(is.na(result)) < ncol(result), ]
 
-    return(result)
+  return(result)
 }

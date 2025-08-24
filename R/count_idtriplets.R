@@ -19,29 +19,29 @@
 #' )
 #' count_idtriplets(data)
 count_idtriplets <- function(data, cols = c("patid", "evtid", "eltid", "doc_id", "pmsi_id")) {
-    # Normalize both the columns in the data and the provided column names to lowercase
-    data_colnames <- tolower(names(data))
+  # Normalize both the columns in the data and the provided column names to lowercase
+  data_colnames <- tolower(names(data))
 
-    # Automatically detect columns if `cols` is not explicitly passed
-    if (missing(cols)) {
-        # Check for default column names (case-insensitive)
-        cols <- intersect(cols, data_colnames)
+  # Automatically detect columns if `cols` is not explicitly passed
+  if (missing(cols)) {
+    # Check for default column names (case-insensitive)
+    cols <- intersect(cols, data_colnames)
+  } else {
+    # Normalize user-supplied `cols` to lowercase
+    cols <- tolower(cols)
+  }
+
+  # Loop through each column and find distinct values
+  for (col in cols) {
+    # Find the correct column name in the data (case-insensitive match)
+    col_index <- match(col, data_colnames)
+    if (!is.na(col_index)) {
+      # Print the distinct count for the matched column
+      col_name <- names(data)[col_index]
+      cat(paste(col_name, ": n =", n_distinct(data[[col_name]]), "\n"))
     } else {
-        # Normalize user-supplied `cols` to lowercase
-        cols <- tolower(cols)
+      # Skip missing columns and continue with the others
+      cat(paste("Column", col, "not found in the data, skipping.\n"))
     }
-
-    # Loop through each column and find distinct values
-    for (col in cols) {
-        # Find the correct column name in the data (case-insensitive match)
-        col_index <- match(col, data_colnames)
-        if (!is.na(col_index)) {
-            # Print the distinct count for the matched column
-            col_name <- names(data)[col_index]
-            cat(paste(col_name, ": n =", n_distinct(data[[col_name]]), "\n"))
-        } else {
-            # Skip missing columns and continue with the others
-            cat(paste("Column", col, "not found in the data, skipping.\n"))
-        }
-    }
+  }
 }

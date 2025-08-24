@@ -7,13 +7,15 @@
 #' @return A character vector containing the names of the columns where all values are `NA`.
 #'
 #' @examples
-#' df <- data.frame(a = c(1, 2, 3),
-#'                  b = c(NA, NA, NA),
-#'                  c = c(4, NA, 6))
+#' df <- data.frame(
+#'   a = c(1, 2, 3),
+#'   b = c(NA, NA, NA),
+#'   c = c(4, NA, 6)
+#' )
 #' na_only_cols(df)
 #' # Returns: "b"
 #'
 #' @export
 na_only_cols <- function(df) {
-    names(df)[colSums(!is.na(df)) == 0]
+  names(df)[colSums(!is.na(df)) == 0]
 }

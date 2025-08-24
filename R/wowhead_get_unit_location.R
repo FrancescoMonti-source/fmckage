@@ -23,7 +23,7 @@ library(purrr)
 #' wowhead_get_unit_location(135263)
 #'
 #' # Retrieve locations for multiple NPCs
-#' npc_ids <- c(214840, 135263, 214842)  # Replace with actual NPC IDs
+#' npc_ids <- c(214840, 135263, 214842) # Replace with actual NPC IDs
 #' npc_locations <- wowhead_get_unit_location(npc_ids)
 #' print(npc_locations)
 #' }
@@ -31,49 +31,47 @@ library(purrr)
 #' @import rvest dplyr purrr
 #' @export
 wowhead_get_unit_location <- function(npc_ids) {
+  # Inner function to retrieve the location for a single NPC ID
+  get_single_npc_location <- function(npc_id) {
+    # Construct the URL for the NPC on Wowhead
+    url <- paste0("https://www.wowhead.com/npc=", npc_id)
 
-    # Inner function to retrieve the location for a single NPC ID
-    get_single_npc_location <- function(npc_id) {
+    # Try to read the page
+    page <- tryCatch(read_html(url), error = function(e) NULL)
 
-        # Construct the URL for the NPC on Wowhead
-        url <- paste0("https://www.wowhead.com/npc=", npc_id)
-
-        # Try to read the page
-        page <- tryCatch(read_html(url), error = function(e) NULL)
-
-        # If the page fails to load, return NA
-        if (is.null(page)) {
-            return(NA)
-        }
-
-        # Attempt to extract locations from the primary method (span with id="locations")
-        locations <- page %>%
-            html_node("#locations") %>%
-            html_nodes("a") %>%  # Select all <a> tags within the locations span
-            html_text(trim = TRUE)
-
-        # If the primary method fails, try an alternative method by looking for links with "/zone="
-        if (length(locations) == 0) {
-            locations <- page %>%
-                html_nodes("a") %>%
-                # Filter links containing "/zone="
-                html_nodes(xpath = '//a[contains(@href, "/zone=")]') %>%
-                html_text(trim = TRUE)
-        }
-
-        # If no locations are found, return NA
-        if (length(locations) == 0) {
-            return(NA)
-        }
-
-        # Return the locations as a single concatenated string
-        return(paste(locations, collapse = "; "))
+    # If the page fails to load, return NA
+    if (is.null(page)) {
+      return(NA)
     }
 
-    # Apply the inner function to each NPC ID in the vector and combine results
-    locations_data <- map_dfr(npc_ids, function(id) {
-        tibble(npc_id = id, location = get_single_npc_location(id))
-    })
+    # Attempt to extract locations from the primary method (span with id="locations")
+    locations <- page %>%
+      html_node("#locations") %>%
+      html_nodes("a") %>% # Select all <a> tags within the locations span
+      html_text(trim = TRUE)
 
-    return(locations_data)
+    # If the primary method fails, try an alternative method by looking for links with "/zone="
+    if (length(locations) == 0) {
+      locations <- page %>%
+        html_nodes("a") %>%
+        # Filter links containing "/zone="
+        html_nodes(xpath = '//a[contains(@href, "/zone=")]') %>%
+        html_text(trim = TRUE)
+    }
+
+    # If no locations are found, return NA
+    if (length(locations) == 0) {
+      return(NA)
+    }
+
+    # Return the locations as a single concatenated string
+    return(paste(locations, collapse = "; "))
+  }
+
+  # Apply the inner function to each NPC ID in the vector and combine results
+  locations_data <- map_dfr(npc_ids, function(id) {
+    tibble(npc_id = id, location = get_single_npc_location(id))
+  })
+
+  return(locations_data)
 }

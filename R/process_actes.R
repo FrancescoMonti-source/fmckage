@@ -6,17 +6,16 @@
 #' @return A transformed dataframe containing relevant "actes" data.
 #' @export
 #' @examples
-#' data <- data.frame()  # Example data
+#' data <- data.frame() # Example data
 #' actes_data <- process_actes(data)
 process_actes <- function(data) {
-    data %>%
-        select(PATID,EVTID,ELTID, PATBD, PATAGE, PATSEX, DATENT, DATSORT, SEJDUR, SEJUM, SEJUF, contains("ACTE"), contains("UFPRO"), contains("UFDEM")) %>%
-        pivot_longer(
-            cols = c(contains("CODEACTE"), contains("DATEACTE"), contains("UFPRO"), contains("UFDEM"), contains("NOMENCLATURE")),
-            names_to = c(".value"),
-            names_pattern = "(CODEACTE|DATEACTE|UFPRO|UFDEM|NOMENCLATURE).*",
-            values_drop_na = TRUE
-        ) %>%
-        distinct()
+  data %>%
+    select(PATID, EVTID, ELTID, PATBD, PATAGE, PATSEX, DATENT, DATSORT, SEJDUR, SEJUM, SEJUF, contains("ACTE"), contains("UFPRO"), contains("UFDEM")) %>%
+    pivot_longer(
+      cols = c(contains("CODEACTE"), contains("DATEACTE"), contains("UFPRO"), contains("UFDEM"), contains("NOMENCLATURE")),
+      names_to = c(".value"),
+      names_pattern = "(CODEACTE|DATEACTE|UFPRO|UFDEM|NOMENCLATURE).*",
+      values_drop_na = TRUE
+    ) %>%
+    distinct()
 }
-

@@ -6,5 +6,5 @@
 #' @return A logical. TRUE if the dates are within the specified number of days of each other, FALSE otherwise.
 #' @export
 within_days <- function(x, y, days = 2) {
-    abs(as.numeric(difftime(x, y, units = "days"))) <= days
+  abs(as.numeric(difftime(x, y, units = "days"))) <= days
 }

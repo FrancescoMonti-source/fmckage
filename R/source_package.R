@@ -5,8 +5,7 @@
 #' @param package_name Package to load.
 
 
-source_package =  function(path = "/appli/edsan_datalake/edsan_data/utils/", package_name=""){
-
-    path = paste0("/appli/edsan_datalake/edsan_data/utils/",package_name,".R")
-    source(path)
+source_package <- function(path = "/appli/edsan_datalake/edsan_data/utils/", package_name = "") {
+  path <- paste0("/appli/edsan_datalake/edsan_data/utils/", package_name, ".R")
+  source(path)
 }

@@ -17,31 +17,34 @@
 #'
 #' @export
 wowhead_get_icon_from_spell_id <- function(spell_id) {
-    url <- paste0("https://www.wowhead.com/spell=", spell_id)
+  url <- paste0("https://www.wowhead.com/spell=", spell_id)
 
-    resp <- tryCatch({
-        httr::GET(url, httr::add_headers(`User-Agent` = "Mozilla/5.0"))
-    }, error = function(e) {
-        message("Error fetching spell ID ", spell_id, ": ", e$message)
-        return(NULL)
-    })
-
-    if (is.null(resp) || httr::http_error(resp)) {
-        message("Failed to fetch spell ID: ", spell_id)
-        return(NA)
+  resp <- tryCatch(
+    {
+      httr::GET(url, httr::add_headers(`User-Agent` = "Mozilla/5.0"))
+    },
+    error = function(e) {
+      message("Error fetching spell ID ", spell_id, ": ", e$message)
+      return(NULL)
     }
+  )
 
-    html <- httr::content(resp, "text", encoding = "UTF-8")
+  if (is.null(resp) || httr::http_error(resp)) {
+    message("Failed to fetch spell ID: ", spell_id)
+    return(NA)
+  }
 
-    icon_line <- stringr::str_extract(html, '"iconFilename":"[^"]+')
+  html <- httr::content(resp, "text", encoding = "UTF-8")
 
-    if (is.na(icon_line)) {
-        message("Icon not found for spell ID: ", spell_id)
-        return(NA)
-    }
+  icon_line <- stringr::str_extract(html, '"iconFilename":"[^"]+')
 
-    icon_name <- stringr::str_remove(icon_line, '"iconFilename":"')
-    icon_url <- paste0("https://wow.zamimg.com/images/wow/icons/large/", icon_name, ".jpg")
+  if (is.na(icon_line)) {
+    message("Icon not found for spell ID: ", spell_id)
+    return(NA)
+  }
 
-    return(icon_url)
+  icon_name <- stringr::str_remove(icon_line, '"iconFilename":"')
+  icon_url <- paste0("https://wow.zamimg.com/images/wow/icons/large/", icon_name, ".jpg")
+
+  return(icon_url)
 }

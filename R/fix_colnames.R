@@ -16,15 +16,14 @@
 #'
 
 fix_colnames <- function(df) {
-    # Trim whitespace, replace dots with underscores, lowercase everything, and remove accents
-    names(df) <- sapply(names(df), function(x) {
-        x <- stringr::str_trim(x) %>%
-            stringr::str_replace_all("[:punct:]", "_") %>%
-            stringr::str_replace_all("\\s", "_") %>%
-            tolower() %>%
-            rm_accent()
-    }
-    )
+  # Trim whitespace, replace dots with underscores, lowercase everything, and remove accents
+  names(df) <- sapply(names(df), function(x) {
+    x <- stringr::str_trim(x) %>%
+      stringr::str_replace_all("[:punct:]", "_") %>%
+      stringr::str_replace_all("\\s", "_") %>%
+      tolower() %>%
+      rm_accent()
+  })
 
-    return(df)
+  return(df)
 }

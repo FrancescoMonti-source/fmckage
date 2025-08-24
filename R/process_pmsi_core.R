@@ -22,17 +22,17 @@
 #'
 #' @export
 process_pmsi_core <- function(data) {
-    clean_data <- lapply(data, function(x) {
-        flat <- unlist(x, recursive = TRUE)
+  clean_data <- lapply(data, function(x) {
+    flat <- unlist(x, recursive = TRUE)
 
-        # Ensure all values are character, collapse vectors
-        flat <- lapply(flat, function(v) {
-            if (length(v) > 1) paste(v, collapse = ";") else as.character(v)
-        })
+    # Ensure all values are character, collapse vectors
+    flat <- lapply(flat, function(v) {
+      if (length(v) > 1) paste(v, collapse = ";") else as.character(v)
+    })
 
-        as.data.frame(flat, stringsAsFactors = FALSE)
-    }) %>%
-        bind_rows()
+    as.data.frame(flat, stringsAsFactors = FALSE)
+  }) %>%
+    bind_rows()
 
-    clean_data
+  clean_data
 }

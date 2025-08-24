@@ -28,54 +28,57 @@
 #'
 #' @export
 query_match_binary_df_doceds <- function(query_list = NULL, PATID = "", EVTID = "", PATBD = "", RECDATE = "", PATAGE = "", PATSEX = "", SEJUM = "", SEJUF = "", RECTYPE = "") {
-    # Check for required packages
-    required_packages <- c("d2imr","dplyr", "tidyr", "purrr")
-    missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
-    if (length(missing_packages) > 0) {
-        stop(paste("Missing required packages:", paste(missing_packages, collapse = ", "), ". Please install them."))
+  # Check for required packages
+  required_packages <- c("d2imr", "dplyr", "tidyr", "purrr")
+  missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
+  if (length(missing_packages) > 0) {
+    stop(paste("Missing required packages:", paste(missing_packages, collapse = ", "), ". Please install them."))
+  }
+
+
+  results <- purrr::map_dfr(names(query_list), function(query_name) {
+    query <- query_list[[query_name]]
+
+    res <- d2imr::d2im_wsc.get_edsan_idtriplets_as_dataframe(
+      "doceds",
+      paste0(
+        '{"RECTXT":"', query, '",',
+        '"PATBD":"', PATBD, '",',
+        '"PATID":"', PATID, '",',
+        '"EVTID":"', EVTID, '",',
+        '"RECDATE":"', RECDATE, '",',
+        '"PATAGE":"', PATAGE, '",',
+        '"PATSEX":"', PATSEX, '",',
+        '"SEJUM":"', SEJUM, '",',
+        '"SEJUF":"', SEJUF, '",',
+        '"RECTYPE":"', RECTYPE, '"}'
+      ),
+      "edsan"
+    )
+
+    if (is.null(res) || length(res) == 0) {
+      return(NULL)
     }
 
-
-    results <- purrr::map_dfr(names(query_list), function(query_name) {
-        query <- query_list[[query_name]]
-
-        res <- d2imr::d2im_wsc.get_edsan_idtriplets_as_dataframe(
-            "doceds",
-            paste0(
-                '{"RECTXT":"', query, '",',
-                '"PATBD":"', PATBD, '",',
-                '"PATID":"', PATID, '",',
-                '"EVTID":"', EVTID, '",',
-                '"RECDATE":"', RECDATE, '",',
-                '"PATAGE":"', PATAGE, '",',
-                '"PATSEX":"', PATSEX, '",',
-                '"SEJUM":"', SEJUM, '",',
-                '"SEJUF":"', SEJUF, '",',
-                '"RECTYPE":"', RECTYPE, '"}'
-            ),
-            "edsan"
-        )
-
-        if (is.null(res) || length(res) == 0) {
-            return(NULL)
-        }
-
-        res <- tryCatch({
-            res %>%
-                apply(2, unlist) %>%
-                as.data.frame(stringsAsFactors = FALSE) %>%
-                `colnames<-`(toupper(names(.))) %>%
-                dplyr::distinct(PATID, EVTID) %>%
-                dplyr::mutate(CONDITION = query_name)
-        }, error = function(e) {
-            message(paste("Skipping", query_name, "due to error:", e$message))
-            return(NULL)
-        })
-
+    res <- tryCatch(
+      {
         res %>%
-            dplyr::mutate(value = 1) %>%
-            tidyr::pivot_wider(names_from = CONDITION, values_from = value, values_fill = 0)
-    })
+          apply(2, unlist) %>%
+          as.data.frame(stringsAsFactors = FALSE) %>%
+          `colnames<-`(toupper(names(.))) %>%
+          dplyr::distinct(PATID, EVTID) %>%
+          dplyr::mutate(CONDITION = query_name)
+      },
+      error = function(e) {
+        message(paste("Skipping", query_name, "due to error:", e$message))
+        return(NULL)
+      }
+    )
 
-    return(results)
+    res %>%
+      dplyr::mutate(value = 1) %>%
+      tidyr::pivot_wider(names_from = CONDITION, values_from = value, values_fill = 0)
+  })
+
+  return(results)
 }

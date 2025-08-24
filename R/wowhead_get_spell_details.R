@@ -26,7 +26,7 @@
 #' get_spell_details(438832)
 #'
 #' # Retrieve details for multiple spells, including a non-existent spell ID
-#' spell_ids <- c(438832, 438833, 438834)  # Assume 438834 does not exist
+#' spell_ids <- c(438832, 438833, 438834) # Assume 438834 does not exist
 #' spell_info <- get_spell_details(spell_ids)
 #' print(spell_info)
 #' }
@@ -35,104 +35,106 @@
 #' @export
 
 wowhead_get_spell_details <- function(spell_ids) {
+  # Inner function to retrieve details for a single spell ID
+  get_single_spell_details <- function(spell_id) {
+    # Construct the URL for the spell on Wowhead
+    url <- paste0("https://www.wowhead.com/spell=", spell_id)
 
-    # Inner function to retrieve details for a single spell ID
-    get_single_spell_details <- function(spell_id) {
-        # Construct the URL for the spell on Wowhead
-        url <- paste0("https://www.wowhead.com/spell=", spell_id)
+    # Read the webpage content
+    page <- tryCatch(read_html(url), error = function(e) NULL)
 
-        # Read the webpage content
-        page <- tryCatch(read_html(url), error = function(e) NULL)
-
-        # If the page failed to load, return NA values for all fields
-        if (is.null(page)) {
-            return(data.frame(
-                spell_id = spell_id,
-                name = NA,
-                duration = NA, cooldown = NA, range = NA, cast_time = NA,
-                school = NA, effects = NA, flags = NA, tooltip = NA, stringsAsFactors = FALSE
-            ))
-        }
-
-        # Extract spell name from the main heading
-        name <- page %>% html_node(".heading-size-1") %>% html_text(trim = TRUE)
-
-        # If name is "Spells", it means the spell ID does not exist
-        if (is.na(name) || name == "Spells") {
-            name <- NA
-        }
-
-        # Extracting information from spelldetails
-        spelldetails <- page %>% html_node("#spelldetails") %>% html_nodes("tr")
-
-        # Extract specific fields and clean duplicates or irrelevant text
-        duration <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("Duration", .)] %>%
-            str_extract("\\d+ seconds") %>%
-            unique()
-
-        range <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("Range", .)] %>%
-            str_extract("\\d+ yards") %>%
-            unique()
-
-        cast_time <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("Cast time", .)] %>%
-            str_extract("(\\d+ seconds|Instant)") %>%
-            unique()
-
-        cooldown <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("Cooldown", .)] %>%
-            str_extract("\\d+ (seconds|minutes)") %>%
-            unique()
-
-        school <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("School", .)] %>%
-            str_extract("(Arcane|Fire|Frost|Holy|Nature|Shadow|Physical)") %>%
-            unique()
-
-        # Extract Effects (Effect #1, Effect #2, etc.)
-        effects <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("Effect #", .)] %>%
-            paste(collapse = "; ")  # Combine all effects into a single string
-
-        # Extract Flags
-        flags <- spelldetails %>%
-            html_text(trim = TRUE) %>%
-            .[grep("Flags", .)] %>%
-            str_split("\n") %>%
-            unlist() %>%
-            str_trim() %>%
-            paste(collapse = "; ")
-
-        # Extract Tooltip
-        tooltip <- page %>%
-            html_node("div.q") %>%
-            html_text(trim = TRUE)
-
-        # Create a data frame for the current spell
-        data.frame(
-            spell_id = spell_id,
-            name = ifelse(length(name) == 0, NA, name),
-            duration = ifelse(length(duration) == 0, NA, duration),
-            cooldown = ifelse(length(cooldown) == 0, NA, cooldown),
-            range = ifelse(length(range) == 0, NA, range),
-            cast_time = ifelse(length(cast_time) == 0, NA, cast_time),
-            school = ifelse(length(school) == 0, NA, school),
-            effects = ifelse(length(effects) == 0, NA, effects),
-            flags = ifelse(length(flags) == 0, NA, flags),
-            tooltip = ifelse(length(tooltip) == 0, NA, tooltip),
-            stringsAsFactors = FALSE
-        )
+    # If the page failed to load, return NA values for all fields
+    if (is.null(page)) {
+      return(data.frame(
+        spell_id = spell_id,
+        name = NA,
+        duration = NA, cooldown = NA, range = NA, cast_time = NA,
+        school = NA, effects = NA, flags = NA, tooltip = NA, stringsAsFactors = FALSE
+      ))
     }
 
-    # Apply the inner function to each spell_id in spell_ids and combine results
-    map_dfr(spell_ids, get_single_spell_details)
-}
+    # Extract spell name from the main heading
+    name <- page %>%
+      html_node(".heading-size-1") %>%
+      html_text(trim = TRUE)
 
+    # If name is "Spells", it means the spell ID does not exist
+    if (is.na(name) || name == "Spells") {
+      name <- NA
+    }
+
+    # Extracting information from spelldetails
+    spelldetails <- page %>%
+      html_node("#spelldetails") %>%
+      html_nodes("tr")
+
+    # Extract specific fields and clean duplicates or irrelevant text
+    duration <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("Duration", .)] %>%
+      str_extract("\\d+ seconds") %>%
+      unique()
+
+    range <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("Range", .)] %>%
+      str_extract("\\d+ yards") %>%
+      unique()
+
+    cast_time <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("Cast time", .)] %>%
+      str_extract("(\\d+ seconds|Instant)") %>%
+      unique()
+
+    cooldown <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("Cooldown", .)] %>%
+      str_extract("\\d+ (seconds|minutes)") %>%
+      unique()
+
+    school <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("School", .)] %>%
+      str_extract("(Arcane|Fire|Frost|Holy|Nature|Shadow|Physical)") %>%
+      unique()
+
+    # Extract Effects (Effect #1, Effect #2, etc.)
+    effects <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("Effect #", .)] %>%
+      paste(collapse = "; ") # Combine all effects into a single string
+
+    # Extract Flags
+    flags <- spelldetails %>%
+      html_text(trim = TRUE) %>%
+      .[grep("Flags", .)] %>%
+      str_split("\n") %>%
+      unlist() %>%
+      str_trim() %>%
+      paste(collapse = "; ")
+
+    # Extract Tooltip
+    tooltip <- page %>%
+      html_node("div.q") %>%
+      html_text(trim = TRUE)
+
+    # Create a data frame for the current spell
+    data.frame(
+      spell_id = spell_id,
+      name = ifelse(length(name) == 0, NA, name),
+      duration = ifelse(length(duration) == 0, NA, duration),
+      cooldown = ifelse(length(cooldown) == 0, NA, cooldown),
+      range = ifelse(length(range) == 0, NA, range),
+      cast_time = ifelse(length(cast_time) == 0, NA, cast_time),
+      school = ifelse(length(school) == 0, NA, school),
+      effects = ifelse(length(effects) == 0, NA, effects),
+      flags = ifelse(length(flags) == 0, NA, flags),
+      tooltip = ifelse(length(tooltip) == 0, NA, tooltip),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  # Apply the inner function to each spell_id in spell_ids and combine results
+  map_dfr(spell_ids, get_single_spell_details)
+}

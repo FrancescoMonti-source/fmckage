@@ -24,17 +24,17 @@
 #'
 
 et_voila <- function(n, min_val, max_val, target_value, agg_func = mean) {
-# Inizializza il vettore dei risultati
-results <- sample(min_val:max_val, n, replace = TRUE)
+  # Inizializza il vettore dei risultati
+  results <- sample(min_val:max_val, n, replace = TRUE)
 
-# Calcola la differenza tra il valore target e la statistica aggregata attuale
-diff_value = target_value - agg_func(results)
+  # Calcola la differenza tra il valore target e la statistica aggregata attuale
+  diff_value <- target_value - agg_func(results)
 
-# Logging
-print(paste("Differenza iniziale:", diff_value))
+  # Logging
+  print(paste("Differenza iniziale:", diff_value))
 
-# Controllo dei limiti e correzione
-while (abs(diff_value) > 1e-6) {
+  # Controllo dei limiti e correzione
+  while (abs(diff_value) > 1e-6) {
     # Trova un indice casuale nel vettore dove il valore è maggiore di min_val
     indices_over_min <- which(results > min_val)
     random_index <- sample(indices_over_min, 1)
@@ -43,11 +43,11 @@ while (abs(diff_value) > 1e-6) {
     results[random_index] <- results[random_index] + sign(diff_value)
 
     # Ricalcola la differenza
-    diff_value = target_value - agg_func(results)
-}
+    diff_value <- target_value - agg_func(results)
+  }
 
-# Test statistici
-print(paste("Statistica aggregata calcolata:", agg_func(results)))
+  # Test statistici
+  print(paste("Statistica aggregata calcolata:", agg_func(results)))
 
-return(results)
+  return(results)
 }

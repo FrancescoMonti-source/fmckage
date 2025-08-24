@@ -14,14 +14,14 @@
 #' @import lubridate
 #' @export
 difftime_previous_weekday <- function(target_date, weekday_name) {
-    # Convert target_date to a Date object if it's not already
-    target_date <- as.Date(target_date)
+  # Convert target_date to a Date object if it's not already
+  target_date <- as.Date(target_date)
 
-    # Loop to find the difference in days
-    for (X in 0:365) {
-        new_date <- target_date - days(X)
-        if (weekdays(new_date, abbreviate = FALSE) == weekday_name) {
-            return(X)
-        }
+  # Loop to find the difference in days
+  for (X in 0:365) {
+    new_date <- target_date - days(X)
+    if (weekdays(new_date, abbreviate = FALSE) == weekday_name) {
+      return(X)
     }
+  }
 }

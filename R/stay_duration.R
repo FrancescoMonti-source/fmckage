@@ -18,16 +18,15 @@
 #' @import dplyr
 #' @import purrr
 #' @import lubridate
-    stay_duration <- function(data, id_col, start_col, end_col, new_col_name = "stay_duration") {
-        data %>%
-            mutate(
-                start = as.numeric(as.Date(!!sym(start_col))),
-                end = as.numeric(as.Date(!!sym(end_col)))
-            ) %>%
-            filter(!is.na(start), !is.na(end)) %>%
-            group_by(!!sym(id_col)) %>%
-            summarise(sequences = list(map2(start, end, seq)), .groups = 'keep') %>%
-            mutate(unioned = map(sequences, ~ reduce(.x, union))) %>%
-            summarise(!!sym(new_col_name) := length(unique(unlist(unioned[1])))-1)
-    }
-
+stay_duration <- function(data, id_col, start_col, end_col, new_col_name = "stay_duration") {
+  data %>%
+    mutate(
+      start = as.numeric(as.Date(!!sym(start_col))),
+      end = as.numeric(as.Date(!!sym(end_col)))
+    ) %>%
+    filter(!is.na(start), !is.na(end)) %>%
+    group_by(!!sym(id_col)) %>%
+    summarise(sequences = list(map2(start, end, seq)), .groups = "keep") %>%
+    mutate(unioned = map(sequences, ~ reduce(.x, union))) %>%
+    summarise(!!sym(new_col_name) := length(unique(unlist(unioned[1]))) - 1)
+}
