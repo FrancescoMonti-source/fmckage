@@ -63,10 +63,10 @@ include numeric, logical, factor, and character.
 \examples{
 set.seed(1)
 df <- data.frame(
-  group = factor(sample(c("NS","SI","SA"), 100, TRUE)),
+  group = factor(sample(c("NS", "SI", "SA"), 100, TRUE)),
   diabete = rbinom(100, 1, 0.2),
-  hta     = rbinom(100, 1, 0.3),
-  cancer  = sample(c(0,1,NA), 100, TRUE, prob = c(0.8,0.15,0.05))
+  hta = rbinom(100, 1, 0.3),
+  cancer = sample(c(0, 1, NA), 100, TRUE, prob = c(0.8, 0.15, 0.05))
 )
 
 # Default: exclude missing from denominator, include "Missing" rows
@@ -77,8 +77,8 @@ make_group_table(
   df,
   group_col = group,
   na_mode = "include",
-  group_order = c("NS","SI","SA"),
-  group_labels = c(NS="non_suicidaires", SI="suicidaires_I", SA="suicidaires_A")
+  group_order = c("NS", "SI", "SA"),
+  group_labels = c(NS = "non_suicidaires", SI = "suicidaires_I", SA = "suicidaires_A")
 )
 
 }

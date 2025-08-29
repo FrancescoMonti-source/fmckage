@@ -29,7 +29,7 @@ This function uses web scraping to retrieve location data from Wowhead’s NPC p
 wowhead_get_unit_location(135263)
 
 # Retrieve locations for multiple NPCs
-npc_ids <- c(214840, 135263, 214842)  # Replace with actual NPC IDs
+npc_ids <- c(214840, 135263, 214842) # Replace with actual NPC IDs
 npc_locations <- wowhead_get_unit_location(npc_ids)
 print(npc_locations)
 }

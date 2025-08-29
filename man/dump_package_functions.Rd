@@ -79,20 +79,26 @@ preserving original formatting and comments. Requires a package source directory
 \examples{
 \dontrun{
 # 1) Write exported functions from an installed package to a single file
-dump_package_functions(out = "stats_dump.R",
-                       package = "stats",
-                       only_exported = TRUE,
-                       dest = "file")
+dump_package_functions(
+  out = "stats_dump.R",
+  package = "stats",
+  only_exported = TRUE,
+  dest = "file"
+)
 
 # 2) Print all functions from a source tree to the console
-dump_package_functions(dir = "/path/to/pkg",
-                       include_internal = TRUE,
-                       dest = "console")
+dump_package_functions(
+  dir = "/path/to/pkg",
+  include_internal = TRUE,
+  dest = "console"
+)
 
 # 3) Get the code blocks in-memory (named character vector)
-blocks <- dump_package_functions(package = "utils",
-                                 only_exported = TRUE,
-                                 dest = "return")
+blocks <- dump_package_functions(
+  package = "utils",
+  only_exported = TRUE,
+  dest = "return"
+)
 names(blocks)
 substr(blocks[[1]], 1, 80)
 }

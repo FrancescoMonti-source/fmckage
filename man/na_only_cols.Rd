@@ -16,9 +16,11 @@ A character vector containing the names of the columns where all values are \cod
 This function returns the names of the columns in a data frame or tibble that contain only \code{NA} values.
 }
 \examples{
-df <- data.frame(a = c(1, 2, 3),
-                 b = c(NA, NA, NA),
-                 c = c(4, NA, 6))
+df <- data.frame(
+  a = c(1, 2, 3),
+  b = c(NA, NA, NA),
+  c = c(4, NA, 6)
+)
 na_only_cols(df)
 # Returns: "b"
 

@@ -16,6 +16,6 @@ A transformed dataframe containing relevant "actes" data.
 This function processes PMSI "actes" data by pivoting and transforming relevant columns.
 }
 \examples{
-data <- data.frame()  # Example data
+data <- data.frame() # Example data
 actes_data <- process_actes(data)
 }

@@ -23,7 +23,7 @@ It groups the data by the specified columns, filters out unique rows, and return
 data <- tibble::tibble(
   id = c(1, 2, 2, 3, 4, 4, 4),
   value = c("A", "B", "B", "C", "D", "D", "D"),
-  date = as.Date(c('2023-01-01', '2023-01-02', '2023-01-02', '2023-01-03', '2023-01-04', '2023-01-04', '2023-01-04'))
+  date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-02", "2023-01-03", "2023-01-04", "2023-01-04", "2023-01-04"))
 )
 
 # Use the function to select duplicated rows based on the 'id' column

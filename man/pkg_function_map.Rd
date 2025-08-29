@@ -40,6 +40,7 @@ statically parse \code{r_dir} to map function -> file.
 library(pkgnet)
 pkg_report <- CreatePackageReport(pkg_name = "yourpkg")
 map <- pkg_function_map(pkg_report, r_dir = "R")
-map$by_function; map$by_file
+map$by_function
+map$by_file
 }
 }

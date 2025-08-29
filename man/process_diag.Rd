@@ -16,6 +16,6 @@ A transformed dataframe with diagnosis type and diagnosis codes.
 This function processes diagnosis (diag) data by selecting relevant columns, unnesting, and separating diagnosis codes.
 }
 \examples{
-data <- data.frame()  # Example data
+data <- data.frame() # Example data
 diag_data <- process_diag(data)
 }

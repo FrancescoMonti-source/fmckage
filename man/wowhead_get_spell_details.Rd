@@ -36,7 +36,7 @@ This function uses web scraping to retrieve data from Wowhead's spell pages. If 
 get_spell_details(438832)
 
 # Retrieve details for multiple spells, including a non-existent spell ID
-spell_ids <- c(438832, 438833, 438834)  # Assume 438834 does not exist
+spell_ids <- c(438832, 438833, 438834) # Assume 438834 does not exist
 spell_info <- get_spell_details(spell_ids)
 print(spell_info)
 }

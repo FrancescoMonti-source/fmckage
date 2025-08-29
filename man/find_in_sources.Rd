@@ -8,7 +8,7 @@ find_in_sources(
   pattern,
   replacement = NULL,
   write = FALSE,
-  dirs = c("R", "src", "inst"),
+  dirs = c("R", "src", "inst", "tests"),
   include_ext = c("\\\\.R$", "\\\\.r$", "\\\\.Rmd$", "\\\\.Rnw$"),
   excludes = character(0),
   perl = TRUE,
@@ -104,16 +104,17 @@ find_in_sources("setClass\\\\(", include_ext = c("\\\\\\\\.R$", "\\\\\\\\.Rmd$")
 res <- find_in_sources(
   pattern     = "(\\\\.)old_api\\\\b",
   replacement = "\\\\1new_api",
-  dirs        = c("R","tests"),
+  dirs        = c("R", "tests"),
   write       = FALSE
 )
-res$total_hits; subset(res$files, changed)
+res$total_hits
+subset(res$files, changed)
 
 # Apply for real:
 find_in_sources(
   pattern     = "(\\\\.)old_api\\\\b",
   replacement = "\\\\1new_api",
-  dirs        = c("R","tests"),
+  dirs        = c("R", "tests"),
   write       = TRUE
 )
 }

@@ -94,7 +94,7 @@
 find_in_sources <- function(pattern,
                             replacement = NULL,
                             write = FALSE,
-                            dirs = c("R", "src", "inst"),
+                            dirs = c("R", "src", "inst", "tests"),
                             include_ext = c("\\.R$", "\\.r$", "\\.Rmd$", "\\.Rnw$"),
                             excludes = character(0),
                             perl = TRUE,

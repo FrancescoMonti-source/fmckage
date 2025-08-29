@@ -16,6 +16,6 @@ A transformed dataframe containing main PMSI data fields.
 This function processes the main PMSI data, including admission and discharge dates, patient age and sex, and stay duration.
 }
 \examples{
-data <- data.frame()  # Example data
+data <- data.frame() # Example data
 main_data <- process_main(data)
 }
