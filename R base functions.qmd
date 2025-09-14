@@ -1,0 +1,328 @@
+---
+title: "Base R Functional Programming Cheatsheet"
+format: 
+    html:
+        toc: true
+        toc_float: true
+        number-sections: true
+        number-depth: 3
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## **Reduce**
+
+**Fold a vector down to one value.**
+
+```{r, eval=F}
+Reduce(`+`, 1:5)    # sum -> 15 
+Reduce(`*`, 1:5)    # product -> 120  
+
+# With custom function 
+gcd2 <- function(a,b) if (b == 0) abs(a) else Recall(b, a %% b) 
+Reduce(gcd2, c(48,18,30))   # gcd -> 6 
+```
+
+### Options
+
+`init` → start with a given value\
+`accumulate = TRUE` → cumulative results\
+`right = TRUE` → fold from right
+
+```{r, eval=F}
+Reduce(`+`, 1:5, accumulate = TRUE)   # 1  3  6 10 15 
+Reduce(`+`, 1:5, init = 100)          # 115 
+```
+
+## **Filter**
+
+**Keep only elements where a predicate is TRUE.**
+
+```{r, eval=F}
+Filter(is.numeric, list(1,"a",2,TRUE))   # keeps 1, 2 
+Filter(function(x) x > 5, 1:10)          # 6 7 8 9 10 
+```
+
+## **Find**
+
+**Return the first element that matches a condition.**
+
+```{r, eval=F}
+Find(function(x) x > 5, 1:10)      # 6 
+Find(is.character, list(1,"a",2))  # "a" 
+```
+
+## **Position**
+
+**Return the index of the first match.**
+
+```{r, eval=F}
+Position(function(x) x > 5, 1:10)  # 6 
+Position(is.character, list(1,"a",2)) # 2 
+```
+
+## **Recall**
+
+**Call the current function recursively (cleaner than naming it).**
+
+```{r, eval=F}
+fact <- function(n) if (n == 0) 1 else n * Recall(n-1) 
+fact(5)   # 120 
+```
+
+## **outer**
+
+**Pairwise combinations → matrices/tables.**
+
+```{r, eval=F}
+outer(1:5, 1:5, "*")   # multiplication table  
+
+gcd <- function(a,b) if (b == 0) abs(a) else Recall(b, a %% b)
+vgcd = Vectorize(gcd)
+outer(c(12,18,30), c(18,18,30), vgcd)      
+
+#       [,1] [,2] [,3] 
+# [1,]   12    6    6 
+# [2,]    6   18    6 
+# [3,]    6    6   30 
+```
+
+## **Vectorize**
+
+**Turn a scalar function into a vectorized one.**
+
+```{r, eval=F}
+f <- function(x, y) x^y 
+
+vf <- Vectorize(f) 
+
+vf(1:3, 2)   # 1 4 9 
+```
+
+## **mapply / Map**
+
+**Vectorized multi-argument apply.**
+
+```{r, eval=F}
+mapply(paste, c("a","b"), c(1,2)) # "a 1" "b 2"  
+
+Map(`+`, list(1,2,3), list(10,20,30)) # list(11, 22, 33) 
+```
+
+## **by** & **tapply**
+
+`by()`: Split-apply-combine on **data frames.**
+
+```{r, eval=F}
+by(iris$Sepal.Length, iris$Species, mean) #subset Length by Species
+```
+
+`tapply():` Apply a function to subsets of a **vector**.
+
+```{r, eval=F}
+tapply(iris$Sepal.Length, iris$Species, mean) #subset Length by Species
+```
+
+Looks similar to `tapply()`, but:
+
+-   `tapply()` works on vectors, while `by()` is designed for data frames, and often used to apply a function to columns within subsets.
+
+-   `by()` returns a "by" object, which is essentially a list with group labels, while `tapply()` returns an array (often a vector or matrix).
+
+**Rule of thumb**:
+
+-   If you’re working with a **single vector** grouped by factors → use `tapply()`.
+
+-   If you’re working with a **data frame** and want to apply a function to each group’s subset → use `by()`
+
+## **switch()**
+
+`switch()` is a branching function. it chooses one value/expression among many, based on either:
+
+-   A character string (name matching)
+
+-   A number (position matching)
+
+It’s like a compact `if/else` `if/else` chain.
+
+```{r, eval = F}
+x <- "b" 
+switch(x, a = 1, b = 2, c = 3) # 2
+
+# with default (match E otherwise return 0):
+grade <- "E" 
+switch(grade, A=4, B=3, C=2, D=1, `0`) # 0 
+
+switch(1, cat = "meow", dog = "woof", cow = "moo")
+# "meow"
+switch(3, cat = "meow", dog = "woof", cow = "moo")
+# "moo"
+switch(4, cat = "meow", dog = "woof", cow = "moo")
+# NULL
+
+```
+
+Tips:
+
+-   If `EXPR` is numeric, it’s “pick the nth choice”.
+
+-   If `EXPR` is character, it’s “look up the named choice”.
+
+-   Default handling only works in character mode (unnamed last element).
+
+## **do.call()**
+
+Call a function using a list of arguments (great for meta-programming or piping).
+
+```{r, eval = F}
+args <- list(1:5, na.rm = TRUE) 
+do.call(sum, args) # 15
+```
+
+```{r eval = F}
+parts <- list("a","b","c")
+do.call(paste, list(parts, collapse = "-")) # [1] "a-b-c"
+
+```
+
+## **Code-as-Data: quote(), substitute(), eval()**
+
+**Construct and evaluate expressions programmatically (R’s Lisp-y side).**
+
+```{r eval = F}
+expr <- quote(x + y)
+expr2 <- do.call(substitute, list(expr, list(x=1, y=2)))
+expr2 # 1 + 2
+eval(expr2) # 3
+
+# Build a call to mean(x, na.rm = TRUE)
+call <- substitute(mean(v, na.rm = narm), list(v = quote(x), narm = TRUE))
+x <- c(1, NA, 3)
+eval(call) # 2
+
+# Build a call to mean(x, na.rm = TRUE)
+call <- substitute(mean(v, na.rm = narm), list(v = quote(x), narm = TRUE)) x <- c(1, NA, 3) 
+eval(call) # 2 
+```
+
+Use-cases: Non-standard evaluation, programmatic modeling, macro-like helpers.
+
+## **replicate()**
+
+Repeat an expression and collect results (handy for simulations/bootstraps).
+
+```{r eval = F}
+# 10 fair coin flips → 1=heads, 0=tails 
+replicate(10, sample(0:1, 1)) 
+```
+
+## **combn() & expand.grid()**
+
+`combn()`: All combinations of size m from a single vector (returns a matrix; columns are combos).
+
+```{r eval = F}
+# Apply a function to each combination of size m
+# combn(letters[1:4], m)
+combn(letters[1:4], 2)
+#      [,1] [,2] [,3] [,4] [,5] [,6]
+# [1,] "a"  "a"  "a"  "b"  "b"  "c"
+# [2,] "b"  "c"  "d"  "c"  "d"  "d"
+
+# combn(x, s, FUN = sum)
+x <- c(10,20,30,40)
+combn(x, 2, FUN = sum)
+
+
+```
+
+`expand.grid()`: Cartesian product of vector**S** → data-frame of all factor-level combos.
+
+```{r eval = F}
+expand.grid(size = c("S","M"), color = c("red","blue"))
+#   size color
+# 1    S   red
+# 2    M   red
+# 3    S  blue
+# 4    M  blue
+
+# Useful for hyperparameter grids, scenario tables, etc.
+
+```
+
+## **“Replicate + \*apply” (quick patterns)**
+
+Stochastic sims with shape control — often clearer than nested loops.
+
+```{r eval = F}
+# Simulate 1e3 sample means of N(0,1) with n=30
+set.seed(42)
+samp_means <- replicate(1000, mean(rnorm(30)))
+mean(samp_means); sd(samp_means)
+
+# Vectorized parameter sweeps
+ns   <- c(10, 30, 100)
+reps <- 500
+res <- sapply(ns, function(ns) mean(replicate(reps, sd(rnorm(ns)))))
+res
+
+```
+
+-   `rnorm(n)` → generate n random draws from N(0,1).
+
+-   `sd(rnorm(n))` → compute the sample standard deviation for that draw.
+
+-   `replicate(reps, sd(rnorm(n)))` → repeat that experiment reps times.
+
+-   `mean(...)` → average the 500 sample SDs, i.e. estimate the expected value of the sample SD at sample size n.
+
+-   `sapply(ns, ...)` runs this whole process once for each n in c(10, 30, 100).
+
+-   👉 So res is a vector of length 3, each entry = mean sample SD for that sample size
+
+```{r eval = F}
+# Matrix of results: rows=replicates, cols=ns} 
+ns   <- c(10, 30, 100)
+reps <- 500
+mat <- sapply(ns, function(n) replicate(reps, mean(rnorm(n)))) 
+str(mat)  # reps x length(ns)
+
+```
+
+Here we change the inside:
+
+-   instead of `sd(rnorm(n))`, it’s `mean(rnorm(n))`. So we’re now looking at the distribution of sample means.
+
+-   `replicate(reps, mean(rnorm(n)))` → 500 sample means, each from a sample of size `n`.
+
+`sapply(ns, ...)` collects those into a matrix:
+
+-   Rows = `replicates (500)`.
+
+-   Columns = different n values (3 columns).
+
+So `mat[ ,1]` = 500 sample means with n=10,\
+`mat[ ,2]` = 500 sample means with n=30,\
+`mat[ ,3]` = 500 sample means with n=100.
+
+## **rapply()**
+
+Recursive apply over nested lists (optionally returns a flattened vector).
+
+```{r eval = F}
+x <- list(a = 1:3, b = list(c = 4:5, d = list(e = 6)))
+rapply(x, sqrt, how = "unlist")
+# a1 a2     a3      c1  c2      e 
+# 1  1.414  1.732   2   2.236   2.449
+
+# Preserve structure, transform only numerics:
+rapply(x, function(z) z^2, classes = "numeric", how = "replace")
+```
+
+Notes: -
+
+-   `how="replace"` keeps structure;
+
+-   `"unlist"` flattens.
+
+-   `classes=` filters which leaf types get transformed.
