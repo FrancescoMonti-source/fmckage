@@ -2,28 +2,74 @@
 % Please edit documentation in R/convert_time.R
 \name{convert_time}
 \alias{convert_time}
-\title{Convert time units}
+\title{Convert durations between time units with flexible formatting}
 \usage{
-convert_time(x, from = NULL, to = NULL, warn_residual = TRUE)
+convert_time(
+  x,
+  from = NULL,
+  to = NULL,
+  warn_residual = TRUE,
+  style = c("abbr", "colon", "long"),
+  zero_pad = TRUE
+)
 }
 \arguments{
-\item{x}{A numeric vector, the time durations to be converted.}
+\item{x}{Numeric vector of values to convert.}
 
-\item{from}{A character string, the unit of the input time durations. It should be one of "seconds", "minutes", "hours", "days", "months", or "years".}
+\item{from}{Character scalar. Input unit of \code{x}. Must be one of
+\code{"years"}, \code{"months"}, \code{"weeks"}, \code{"days"}, \code{"hours"}, \code{"minutes"}, \code{"seconds"}.}
 
-\item{to}{A character vector, the units to which the input time durations should be converted. It should contain one or more of "seconds", "minutes", "hours", "days", "months", or "years".}
+\item{to}{Character vector of target units in decreasing order (e.g.,
+\code{c("minutes", "seconds")}). Must be a subset of the same set of unit
+names as \code{from}.}
 
-\item{warn_residual}{A logical value, if TRUE, a warning is printed when there is a residual part not being displayed due to the chosen 'to' units.}
+\item{warn_residual}{Logical (default \code{TRUE}). If \code{TRUE}, emit a warning when
+some residual time cannot be represented with the chosen \code{to} units.}
+
+\item{style}{Output formatting style. One of:
+\describe{
+\item{\code{"abbr"}}{Abbreviated with first letter of each unit
+(default). Example: \code{"3m 17s"}.}
+\item{\code{"colon"}}{Clock-like colon-separated. Works only when \code{to} is a
+contiguous chain such as \code{c("minutes","seconds")} or
+\code{c("hours","minutes","seconds")}. Example: \code{"3:17"}, \code{"1:02:03"}.}
+\item{\code{"long"}}{Full unit names with pluralization. Example:
+\code{"3 minutes 17 seconds"}.}
+}}
+
+\item{zero_pad}{Logical (default \code{TRUE}). If \code{TRUE}, pad smaller units to
+two digits when \code{style = "colon"}. Example: \code{"1:02:03"} instead of \code{"1:2:3"}.}
 }
 \value{
-A character vector of the converted time durations. Each element is a string that concatenates the converted time durations in the units specified by 'to', in the order they are given.
+A character vector of formatted time strings of the same length as
+\code{x}. Elements are \code{NA} if input is \code{NA} or if no units could be
+represented.
 }
 \description{
-This function converts a time duration from one unit to one or more other units.
-The conversion is performed separately for each element in the input vector, and the results are returned as a vector of character strings.
-The input can contain NA values, which are returned as NA in the output.
+\code{convert_time()} converts numeric values from one time unit into a breakdown
+of other time units (e.g., seconds → minutes + seconds), and returns a
+formatted string. Multiple output styles are supported, including abbreviated
+(\code{"3m 17s"}), colon-separated (\code{"3:17"}), and long form (\code{"3 minutes 17 seconds"}).
 }
 \examples{
-convert_time(90, from = "seconds", to = c("minutes", "seconds")) # "1m 30s"
-convert_time(c(90, 3600), from = "seconds", to = c("hours", "minutes", "seconds")) # "0h 1m 30s" "1h 0m 0s"
+# Seconds to minutes + seconds
+convert_time(197, from = "seconds", to = c("minutes","seconds"))
+#> "3m 17s"
+
+# Colon style
+convert_time(197, from = "seconds", to = c("minutes","seconds"), style = "colon")
+#> "3:17"
+
+# Long style
+convert_time(197, from = "seconds", to = c("minutes","seconds"), style = "long")
+#> "3 minutes 17 seconds"
+
+# Hours:minutes:seconds with zero-padding
+convert_time(3723, from = "seconds", to = c("hours","minutes","seconds"), style = "colon")
+#> "1:02:03"
+
+# Vectorized input
+convert_time(c(59, 60, 61, 197), from = "seconds", to = c("minutes","seconds"), style = "colon")
+#> "0:59" "1:00" "1:01" "3:17"
+
 }
