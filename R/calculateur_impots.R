@@ -34,7 +34,7 @@ ir_one_part <- function(income, bareme) {
   r <- bareme$rates
   # upper bounds are next break, last is +Inf
   upp <- c(b[-1], Inf)
-  
+
   tax <- 0
   for (i in seq_along(b)) {
     low <- b[i]
@@ -66,14 +66,14 @@ brut_to_net_final <- function(
     # Cotisations: choisir UNE des deux options ci-dessous
     cotis_salariales_rate = 0.23,   # ex: 23% => net_avant_impot = brut * (1 - 0.23)
     net_sur_brut_ratio = NULL,      # ex: 0.77 (si fourni, écrase cotis_salariales_rate)
-    
+
     # Base imposable
     abattement10 = TRUE,
     abatt_rate = 0.10,
     abatt_min  = 504,
     abatt_max  = 14426,
     frais_reels = NULL,             # si non-NULL, remplace l'abattement (déduction fixe en €)
-    
+
     # IR
     parts = 1,
     bareme = make_bareme(
@@ -82,13 +82,13 @@ brut_to_net_final <- function(
       breaks = c(0, 11497, 29315, 83823, 180294),
       rates  = c(0.00, 0.11, 0.30, 0.41, 0.45)
     ),
-    
+
     # Conversions
     hours_week = 40,
     weeks_year = 52
 ) {
   stopifnot(is.numeric(brut_annuel), brut_annuel >= 0)
-  
+
   # Net avant impôt (approx)
   if (!is.null(net_sur_brut_ratio)) {
     stopifnot(net_sur_brut_ratio > 0, net_sur_brut_ratio < 1.5)
@@ -97,7 +97,7 @@ brut_to_net_final <- function(
     stopifnot(cotis_salariales_rate >= 0, cotis_salariales_rate < 1)
     net_avant_impot <- brut_annuel * (1 - cotis_salariales_rate)
   }
-  
+
   # Revenu imposable "simplifié"
   if (!is.null(frais_reels)) {
     stopifnot(is.numeric(frais_reels), frais_reels >= 0)
@@ -113,14 +113,14 @@ brut_to_net_final <- function(
     deduction_frais  <- 0
     mode_frais <- "aucun"
   }
-  
+
   # IR (simple, sans décote, sans réductions/crédits)
   ir <- ir_household(revenu_imposable, parts = parts, bareme = bareme)
-  
+
   net_apres_impot <- net_avant_impot - ir
-  
+
   hours_year <- hours_week * weeks_year
-  
+
   data.frame(
     brut_annuel = brut_annuel,
     net_avant_impot = net_avant_impot,
@@ -157,6 +157,7 @@ res2 <- brut_to_net_final(
   cotis_salariales_rate = 0.23,
   parts = 1,
   bareme = bareme_2025,
+  hours_week = 35,
   abatt_min = 504, abatt_max = 14426  # revenus 2025 (déclaration 2026)
 )
 print(res2)
