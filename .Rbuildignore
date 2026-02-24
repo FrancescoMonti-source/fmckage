@@ -1,2 +1,15 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^.*_files$
+^.*_cache$
+^_site$
+^_book$
+^_bookdown_files$
+^site_libs$
+^.*\/site_libs$
+^.*\/libs$
+^.*\/quarto-html$
+^.*\.html$
+^.*\.pdf$
+^.*\.docx$
+^.*\.pptx$

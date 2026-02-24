@@ -1,13 +1,13 @@
 #' Generate sequential date periods between two dates
 #'
-#' Creates a tibble of contiguous periods covering [start_date, end_date].
-#' The length of each period is controlled by `by` (passed to [seq.Date()]),
+#' Creates a tibble of contiguous periods covering <start_date, end_date>.
+#' The length of each period is controlled by `by` (passed to <seq.Date()>),
 #' and labels are built with optional `prefix`, `suffix`, and `sep`.
 #'
 #' @param start_date Date or character coercible to Date. Range start (inclusive).
 #' @param end_date   Date or character coercible to Date. Range end (inclusive).
 #' @param sep        String between start and end in each period label. Default `","`.
-#' @param by         Interval passed to [seq.Date()] (e.g. `"1 month"`, `"3 months"`,
+#' @param by         Interval passed to <seq.Date()> (e.g. `"1 month"`, `"3 months"`,
 #'                   `"30 days"`, `"2 weeks"`). Default `"6 months"`.
 #' @param prefix     String prepended to each label. Default `""`.
 #' @param suffix     String appended to each label. Default `""`.

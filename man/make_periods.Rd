@@ -20,7 +20,7 @@ make_periods(
 
 \item{sep}{String between start and end in each period label. Default \code{","}.}
 
-\item{by}{Interval passed to \code{\link[=seq.Date]{seq.Date()}} (e.g. \code{"1 month"}, \code{"3 months"},
+\item{by}{Interval passed to <seq.Date()> (e.g. \code{"1 month"}, \code{"3 months"},
 \code{"30 days"}, \code{"2 weeks"}). Default \code{"6 months"}.}
 
 \item{prefix}{String prepended to each label. Default \code{""}.}
@@ -36,8 +36,8 @@ A tibble with columns:
 }
 }
 \description{
-Creates a tibble of contiguous periods covering \link{start_date, end_date}.
-The length of each period is controlled by \code{by} (passed to \code{\link[=seq.Date]{seq.Date()}}),
+Creates a tibble of contiguous periods covering <start_date, end_date>.
+The length of each period is controlled by \code{by} (passed to <seq.Date()>),
 and labels are built with optional \code{prefix}, \code{suffix}, and \code{sep}.
 }
 \details{
