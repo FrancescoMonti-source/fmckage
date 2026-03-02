@@ -2,24 +2,29 @@
 % Please edit documentation in R/calculateur_impots.R
 \name{apply_abattement10}
 \alias{apply_abattement10}
-\title{Applicare l'abattement 10\% (salarié) con minimo e massimo}
+\title{Apply the 10\% employee allowance (abattement 10\%) with floor and cap}
 \usage{
 apply_abattement10(net_income, rate = 0.1, min_ded = 504, max_ded = 14426)
 }
 \arguments{
-\item{net_income}{Numeric(1). Reddito (tipicamente \code{net_avant_impot}).}
+\item{net_income}{Numeric scalar. Base income to which the deduction is applied
+(typically net imposable).}
 
-\item{rate}{Numeric(1). Tasso dell'abattement (tipicamente 0.10).}
+\item{rate}{Numeric scalar in [0, 1]. Default 0.10.}
 
-\item{min_ded}{Numeric(1). Deduzione minima (in €).}
+\item{min_ded}{Numeric scalar >= 0. Minimum deduction amount in euros.}
 
-\item{max_ded}{Numeric(1). Deduzione massima (in €).}
+\item{max_ded}{Numeric scalar >= 0. Maximum deduction amount in euros.}
 }
 \value{
-Numeric(1). Reddito dopo deduzione.
+Numeric scalar: \code{net_income} after the deduction.
 }
 \description{
-Calcola la deduzione come \code{net_income * rate}, poi applica \code{min_ded} e \code{max_ded},
-e restituisce il reddito dopo deduzione.
+Applies the standard French employee deduction ("frais professionnels") as:
+\code{deduction = clamp(rate * income, min_ded, max_ded)}.
+}
+\examples{
+apply_abattement10(30000, rate = 0.10, min_ded = 504, max_ded = 14426)
+
 }
 \keyword{internal}

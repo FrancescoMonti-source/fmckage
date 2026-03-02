@@ -2,22 +2,35 @@
 % Please edit documentation in R/calculateur_impots.R
 \name{ir_household}
 \alias{ir_household}
-\title{Calcolo IR del foyer con quotient familial (versione semplificata)}
+\title{Compute household income tax using the quotient familial (simplified)}
 \usage{
 ir_household(taxable_income, parts = 1, bareme)
 }
 \arguments{
-\item{taxable_income}{Numeric(1). Revenu imposable del foyer (>=0 consigliato).}
+\item{taxable_income}{Numeric scalar. Household taxable income after deductions
+(e.g., after 10\% allowance or frais réels).}
 
-\item{parts}{Numeric(1). Numero di parts (>0).}
+\item{parts}{Numeric scalar > 0. Number of fiscal parts.}
 
-\item{bareme}{List. Oggetto creato con \code{\link[=make_bareme]{make_bareme()}}.}
+\item{bareme}{List as returned by \code{\link[=make_bareme]{make_bareme()}}.}
 }
 \value{
-Numeric(1). IR stimato per il foyer.
+Numeric scalar: estimated household income tax.
 }
 \description{
-Applica il quotient familial: \code{taxable_income / parts}, calcolo su 1 part,
-poi moltiplica per \code{parts}.
+Computes income tax by dividing taxable income by the number of fiscal parts,
+applying the progressive schedule to one part, then multiplying back by parts.
+}
+\details{
+This is a \strong{simplified} computation: it does not include decote, plafonnement
+du quotient familial, reductions/crédits d'impôt, exceptional contributions, etc.
+}
+\examples{
+b <- make_bareme(
+  breaks = c(0, 11497, 29315, 83823, 180294),
+  rates  = c(0.00, 0.11, 0.30, 0.41, 0.45)
+)
+ir_household(taxable_income = 60000, parts = 2, bareme = b)
+
 }
 \keyword{internal}

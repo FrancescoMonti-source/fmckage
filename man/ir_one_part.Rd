@@ -2,20 +2,29 @@
 % Please edit documentation in R/calculateur_impots.R
 \name{ir_one_part}
 \alias{ir_one_part}
-\title{Calcolo IR progressivo per 1 part (taux marginaux)}
+\title{Compute progressive income tax for one fiscal "part"}
 \usage{
 ir_one_part(income, bareme)
 }
 \arguments{
-\item{income}{Numeric(1). Revenu imposable per 1 part (>=0; valori <0 sono clampati a 0).}
+\item{income}{Numeric scalar. Taxable income for \strong{one} part. Values < 0 are
+treated as 0.}
 
-\item{bareme}{List. Oggetto creato con \code{\link[=make_bareme]{make_bareme()}}.}
+\item{bareme}{List as returned by \code{\link[=make_bareme]{make_bareme()}}, containing \code{breaks} and \code{rates}.}
 }
 \value{
-Numeric(1). Imposta stimata per 1 part.
+Numeric scalar: computed tax for one part.
 }
 \description{
-Applica il barème progressivo ad un reddito imponibile per \emph{una} part.
-Non gestisce decote, réductions/crédits, né altre regole avanzate.
+Applies the marginal rates of a \code{bareme} to a taxable income amount for a single
+household part (before applying the quotient familial).
+}
+\examples{
+bareme_2025 <- make_bareme(
+  breaks = c(0, 11497, 29315, 83823, 180294),
+  rates  = c(0.00, 0.11, 0.30, 0.41, 0.45)
+)
+ir_one_part(30000, bareme_2025)
+
 }
 \keyword{internal}

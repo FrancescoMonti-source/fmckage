@@ -2,28 +2,34 @@
 % Please edit documentation in R/calculateur_impots.R
 \name{make_bareme}
 \alias{make_bareme}
-\title{Creare un oggetto "barème IR" (tranches + taux marginaux)}
+\title{Create a progressive income-tax schedule ("barème")}
 \usage{
 make_bareme(breaks, rates)
 }
 \arguments{
-\item{breaks}{Numeric. Vettore crescente dei limiti inferiori delle tranches (prima = 0).}
+\item{breaks}{Numeric vector of lower bounds for each bracket, \strong{starting at 0},
+strictly increasing.}
 
-\item{rates}{Numeric. Vettore dei tassi marginali (0..1), stessa lunghezza di \code{breaks}.}
+\item{rates}{Numeric vector of marginal rates (same length as \code{breaks}),
+each in [0, 1].}
 }
 \value{
-Una lista con \code{breaks} e \code{rates}.
+A list with two elements:
+\describe{
+\item{breaks}{Numeric vector of bracket lower bounds.}
+\item{rates}{Numeric vector of marginal tax rates.}
+}
 }
 \description{
-Costruisce un oggetto barème da passare alle funzioni di calcolo IR.
-\code{breaks} sono i limiti inferiori delle tranches (devono iniziare da 0),
-\code{rates} i tassi marginali associati (stessa lunghezza di \code{breaks}).
+Helper to define a French-style progressive tax schedule as lower bounds
+(\code{breaks}) and marginal rates (\code{rates}).
 }
 \examples{
-make_bareme(
+b <- make_bareme(
   breaks = c(0, 11497, 29315, 83823, 180294),
   rates  = c(0.00, 0.11, 0.30, 0.41, 0.45)
 )
+str(b)
 
 }
 \keyword{internal}
