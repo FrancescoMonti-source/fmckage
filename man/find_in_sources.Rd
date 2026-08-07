@@ -18,7 +18,7 @@ find_in_sources(
 }
 \arguments{
 \item{pattern}{Character(1). Regular expression to search for. Passed to
-\code{\link[base:grep]{base::grepl()}} and \code{\link[base:grep]{base::gsub()}}. Remember to double-escape backslashes.}
+\code{\link[base:grepl]{base::grepl()}} and \code{\link[base:gsub]{base::gsub()}}. Remember to double-escape backslashes.}
 
 \item{replacement}{Character(1) or \code{NULL}. If provided, enables replace mode:
 matches will be substituted with this string (supports backreferences).}
@@ -36,8 +36,8 @@ entries are combined with \code{|} into a single pattern for \code{\link[base:li
 \item{excludes}{Character vector of anchored path prefixes to skip
 (e.g., \code{"renv"}, \code{"packrat"}, \code{"inst/doc"}). Default \code{character(0)}.}
 
-\item{perl}{Logical; whether to use PCRE via \code{perl = TRUE} in \code{\link[base:grep]{base::grepl()}}
-and \code{\link[base:grep]{base::gsub()}}. Defaults to \code{TRUE}.}
+\item{perl}{Logical; whether to use PCRE via \code{perl = TRUE} in \code{\link[base:grepl]{base::grepl()}}
+and \code{\link[base:gsub]{base::gsub()}}. Defaults to \code{TRUE}.}
 
 \item{ignore_case}{Logical; case-insensitive search/replace. Defaults to \code{FALSE}.}
 
@@ -74,7 +74,7 @@ text, not only the matched lines), with an optional dry run.
 }
 \details{
 For each matching file, lines are read as UTF-8 and tested with
-\code{\link[base:grep]{base::grepl()}}. Files that cannot be read are silently skipped.
+\code{\link[base:grepl]{base::grepl()}}. Files that cannot be read are silently skipped.
 \subsection{Modes}{
 \itemize{
 \item \strong{Search-only} (default): behave like the original \code{find_in_sources()}.
@@ -121,5 +121,5 @@ find_in_sources(
 
 }
 \seealso{
-\code{\link[base:grep]{base::grepl()}}, \code{\link[base:grep]{base::gsub()}}, \code{\link[base:list.files]{base::list.files()}}
+\code{\link[base:grepl]{base::grepl()}}, \code{\link[base:gsub]{base::gsub()}}, \code{\link[base:list.files]{base::list.files()}}
 }
